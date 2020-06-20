@@ -1,0 +1,38 @@
+{
+    "Preparing upload": "Bereite Upload vor",
+
+    "Server upload finished.": "Server-Upload abgeschlossen.",
+    "Server upload finished. Waiting for processing...":  "Server-Upload abgeschlossen. Warte auf Verarbeitung...",
+
+    "Waiting for :remaining_uploads_count uploads to finish processing...": "Warte auf Verarbeitung weiterer :remaining_uploads_count Uploads.",
+    "Processing complete.":  "Verarbeitung abgeschlossen.",
+
+    "Merging chunks...": "Füge Dateiblöcke zusammen...",
+    "Merge complete.": "Zusammenfügen abgeschlossen.",
+
+    "Chunked file upload complete.": "Übertragung aller Dateiblöcke abeschlossen.",
+    "Waiting for chunks to be merged...": "Warte auf Zusammenführung der Dateiblöcke...",
+
+    "Upload complete.":  "Upload abgeschlossen.",
+
+    "Cleaning up...": "Lösche temporäre Dateien...",
+    "Successfully concatenated all file parts.": "Die Datei wurde erfolgreich zusammengefügt.",
+
+    "Processing upload with ID :uuid.":  "Verarbeite Upload Nr. :uuid.",
+    ":remaining_uploads_count of :total_uploads_count files left...":  ":remaining_uploads_count von :total_uploads_count Dateien verbleiben...",
+    "Completed upload of :total_uploads_count files.": "Upload von :total_uploads_count Dateien abgeschlossen.",
+    "Concatenating chunk :current_chunk of :total_chunks...": "Füge Upload-Block :current_chunk von :total_chunks an...",
+
+    "Server upload failed.":  "Server-Upload fehlgeschlagen.",
+    "Missing chunk :missing_chunk of :total_chunks: expected file :missing_filename":  "Fehlender Block :missing_chunk von :total_chunks: Fehlende Datei :missing_filename.",
+    ":exception_class while merging: :exception_message":  ":exception_class während des Zusammenfügens: :exception_message.",
+    "The destination file :filename already exists.": "Die Zieldatei :filename existiert bereits.",
+
+    "No upload config found for upload with UUID :uuid.": "Keine Upload-Konfiguration gefunden für den Upload mit der UUID :uuid.",
+    "Upload not found with UUID :uuid at :path.":  "Upload mit UUID :uuid nicht gefunden in Pfad :path.",
+    "Chunk number :chunk_number of :total_chunk_count (:chunk_filename) not found for upload with UUID :uuid.":  "Upload-Block :chunk_number von :total_chunk_count (:chunk_filename) nicht gefunden für Upload mit UUID :uuid.",
+    "No file info found in config for upload with UUID :uuid.": "Keine Datei-Informationen gefunden für Upload mit UUID :uuid.",
+    "Unexpected error: Unable to obtain original filename.": "Unerwarteter Fehler: Konnte keinen Original-Dateinamen ermitteln.",
+    "The upload already finished.": "Der Upload wurde bereits abgeschlossen.",
+    "Unable to determine destination filename: insufficient data.": "Konnte Ziel-Dateinamen nicht bestimmen: unzureichende Daten."
+}

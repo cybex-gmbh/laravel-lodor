@@ -1,0 +1,59 @@
+{
+    "name": "cybex/laravel-lodor",
+    "description": "Provides easy support for processing chunked uploads in Laravel.",
+    "keywords": [
+        "laravel-lodor",
+        "chunked-uploads",
+        "dropzone",
+        "resumablejs",
+        "cybex"
+    ],
+    "homepage": "https://bitbucket.org/cybexgmbh/laravel-lodor",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Oliver Matla",
+            "email": "info@lupinitylabs.com",
+            "homepage": "https://lupinitylabs.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.2",
+        "illuminate/support": "^7.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^5.0",
+        "phpunit/phpunit": "^9.0",
+        "sempro/phpunit-pretty-print": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Cybex\\Lodor\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cybex\\Lodor\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --colors=always",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cybex\\Lodor\\LodorServiceProvider"
+            ],
+            "aliases": {
+                "Lodor": "Cybex\\Lodor\\LodorFacade"
+            }
+        }
+    }
+}
