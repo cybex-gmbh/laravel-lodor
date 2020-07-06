@@ -618,7 +618,7 @@ class Lodor
         return ASCII::clean($filename);
     }
 
-    public function mergeChunkedFile(String $uuid = '')
+    public function mergeChunkedFile(string $uuid = '')
     {
         if (!$this->isChunked($uuid)) {
             // Do not run if this upload is not a chunked upload.
