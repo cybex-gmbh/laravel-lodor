@@ -2,6 +2,7 @@
 
 namespace Cybex\Lodor\Listeners;
 
+use Exception;
 use Illuminate\Config\Repository;
 use Cybex\Lodor\LodorFacade as Lodor;
 use Illuminate\Queue\InteractsWithQueue;
@@ -35,16 +36,21 @@ class MergeChunks implements ShouldQueue
      *
      * @return bool
      */
-    public function shouldQueue(ChunkedFileUploaded $event) {
+    public function shouldQueue(ChunkedFileUploaded $event)
+    {
         $mergeConfig = config('lodor.merge_chunks', []);
 
         if (($mergeConfig['auto_merge_chunks'] ?? true) === false) {
+            // Finish upload.
+            Lodor::finishUpload($event->uuid, $event->metadata);
+
             return false;
         }
 
         if (!($mergeConfig['run_async'] ?? false)) {
             // Run synchronously.
             $this->handle($event);
+
             return false;
         }
 
@@ -57,7 +63,8 @@ class MergeChunks implements ShouldQueue
      *
      * @return Repository|Application|mixed
      */
-    public function viaQueue() {
+    public function viaQueue()
+    {
         return config('lodor.merge_chunks.default_queue', $this->queue);
     }
 
@@ -70,6 +77,15 @@ class MergeChunks implements ShouldQueue
      */
     public function handle(ChunkedFileUploaded $event = null)
     {
-        Lodor::mergeChunkedFile($event->uuid);
+        try {
+            Lodor::mergeChunkedFile($event->uuid);
+        } catch (Exception $exception) {
+            Lodor::failUpload($event->uuid, __('Merging chunks...'), $exception->getMessage(), $event->metadata);
+
+            return;
+        }
+
+        Lodor::setUploadState($event->uuid, 'merge_cleanup');
+        Lodor::finishUpload($event->uuid, $event->metadata);
     }
 }

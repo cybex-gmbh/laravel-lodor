@@ -12,15 +12,17 @@ use UnexpectedValueException;
 use Illuminate\Routing\Router;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\File;
 use Cybex\Lodor\Events\FileUploaded;
-use Illuminate\Support\Facades\Route;
+use Cybex\Lodor\Events\UploadFailed;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Cybex\Lodor\Events\UploadFinished;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Cybex\Lodor\ChunkUploaders\ChunkUploader;
+use Cybex\Lodor\Exceptions\UploadNotFoundException;
 use Illuminate\Contracts\Filesystem\FileExistsException;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
@@ -76,7 +78,7 @@ class Lodor
     public function getRedirectRoute(): ?array
     {
         if (Route::has('lodor_uploaded') && $route = app(Router::class)->getRoutes()->getByName('lodor_uploaded')) {
-            $controller = $route->getController();
+            $controller   = $route->getController();
             $actionMethod = $route->getActionMethod();
 
             if (!($controller instanceof Controller)) {
@@ -151,7 +153,8 @@ class Lodor
 
         return [
             'state'    => $remainingUploads ? 'processing' : 'done',
-            'status'   => $remainingUploads ? __('Waiting for :remaining_uploads_count uploads to finish processing...', ['remaining_uploads_count' => $remainingUploads]) : __('Processing complete.'),
+            'status'   => $remainingUploads ? __('Waiting for :remaining_uploads_count uploads to finish processing...',
+                ['remaining_uploads_count' => $remainingUploads]) : __('Processing complete.'),
             'info'     => $remainingUploads ? __(':remaining_uploads_count of :total_uploads_count files left...',
                 ['remaining_uploads_count' => $remainingUploads, 'total_uploads_count' => $totalUploads]) : __('Completed upload of :total_uploads_count files.',
                 ['total_uploads_count' => $totalUploads]),
@@ -212,7 +215,7 @@ class Lodor
      */
     public function setUploadState(string $uuid, string $state, array $values = [], int $progress = 0, array $metadata = [])
     {
-        $state         = config(sprintf('lodor.states.%s', $state));
+        $state = config(sprintf('lodor.states.%s', $state));
         if ($state !== null) {
             $startProgress = ($state['progress'] ?? 0);
             $progress      = $startProgress + $progress * (($state['progress_end'] ?? $startProgress) - $startProgress);
@@ -447,7 +450,7 @@ class Lodor
                 break;
             case 'rename':
                 $extension = File::extension($relativeFilename);
-                $filename = substr($relativeFilename, 0, -strlen($extension) - 1);
+                $filename  = substr($relativeFilename, 0, -strlen($extension) - 1);
                 $count     = 0;
 
                 do {
@@ -479,9 +482,9 @@ class Lodor
      */
     public function getUploadFilename(string $uuid, string $requestFilename, string $originalFilename, string $originalExtension, UploadedFile $file = null, Request $request = null, array $config = null): string
     {
-        $originalFilename = $this->cleanFilename($originalFilename);
+        $originalFilename  = $this->cleanFilename($originalFilename);
         $originalExtension = $this->cleanFilename($originalExtension);
-        $requestFilename = $this->cleanFilename($requestFilename);
+        $requestFilename   = $this->cleanFilename($requestFilename);
 
         if ($requestFilename != '') {
             // If filename has been specified in request, use this as long
@@ -503,24 +506,26 @@ class Lodor
                 if (app()->has('lodorFilename')) {
                     return app('lodorFilename')->getFilename($uuid, $requestFilename, $originalFilename, $originalExtension, $file, $request, $config);
                 }
-                // Intentional fallthrough
+            // Intentional fallthrough.
             default:
                 return $originalFilename;
         }
     }
 
-    public function getUploadFilenameFromConfig(array $config) {
-        $requestFilename = Arr::get($config, 'metadata.lodor_filename', '');
-        $uuid = Arr::get($config, 'uuid', '');
-        $originalFilename = $config['originalFilename'] ?? '';
+    public function getUploadFilenameFromConfig(array $config)
+    {
+        $requestFilename   = Arr::get($config, 'metadata.lodor_filename', '');
+        $uuid              = Arr::get($config, 'uuid', '');
+        $originalFilename  = $config['originalFilename'] ?? '';
         $originalExtension = $config['originalExtension'] ?? '';
 
         return $this->getUploadFilename($uuid, $requestFilename, $originalFilename, $originalExtension, null, null, $config);
     }
 
-    public function getUploadFilenameFromRequest(string $uuid, Request $request, UploadedFile $file) {
-        $requestFilename = $request->get('lodor_filename', '');
-        $originalFilename = $file->getClientOriginalName();
+    public function getUploadFilenameFromRequest(string $uuid, Request $request, UploadedFile $file)
+    {
+        $requestFilename   = $request->get('lodor_filename', '');
+        $originalFilename  = $file->getClientOriginalName();
         $originalExtension = $file->getClientOriginalExtension();
 
         return $this->getUploadFilename($uuid, $requestFilename, $originalFilename, $originalExtension, $file, $request);
@@ -557,6 +562,22 @@ class Lodor
     }
 
     /**
+     * Fails the upload after an error occured, fires the UploadFailed event
+     * and cleans up after the upload.
+     *
+     * @param string $uploadUuid
+     * @param string $status
+     * @param string $info
+     */
+    public function failUpload(string $uploadUuid, string $status, string $info, array $uploadInfo = [])
+    {
+        $this->setUploadStatus($uploadUuid, 'error', $status, $info, 0);
+        $this->cleanupUpload($uploadUuid);
+
+        event(new UploadFailed($uploadUuid, $info, $uploadInfo));
+    }
+
+    /**
      * Returns an instance of an auto-detected Chunk Uploader or null if the request
      * is not part of a chunked upload or if no uploader matched the request.
      *
@@ -583,7 +604,8 @@ class Lodor
      *
      * @return ChunkUploader|null
      */
-    public function getChunkUploader(Request $request): ?ChunkUploader {
+    public function getChunkUploader(Request $request): ?ChunkUploader
+    {
         $uploaderClass = config('lodor.merge_chunks.uploader');
 
         if ($uploaderClass && $uploaderClass instanceof ChunkUploader) {
@@ -607,7 +629,8 @@ class Lodor
      *
      * @return string
      */
-    public function cleanFilename(string $filename): string {
+    public function cleanFilename(string $filename): string
+    {
         // Eliminate any protocols and paths.
         $filename = File::basename($filename);
 
@@ -625,6 +648,7 @@ class Lodor
      *
      * @throws FileExistsException
      * @throws FileNotFoundException
+     * @throws UploadNotFoundException
      */
     public function mergeChunkedFile(string $uuid = '')
     {
@@ -633,15 +657,12 @@ class Lodor
             return;
         }
 
-        $chunkedStorageDisk = Storage::disk($this->getChunkedUploadDiskName());
+        $chunkedStorageDisk  = Storage::disk($this->getChunkedUploadDiskName());
         $completeStorageDisk = Storage::disk($this->getSingleUploadDiskName());
 
         if (!$chunkedStorageDisk->exists($uuid)) {
             // No directory exists for the specified uuid.
-            $this->setUploadStatus($uuid, 'error', __('Merging chunks...'), __('Upload not found with UUID :uuid at :path.', ['uuid' => $uuid, 'path' => $chunkedStorageDisk->path($uuid)]), 0);
-            $this->cleanupUpload($uuid);
-
-            return;
+            throw new UploadNotFoundException(__('Upload not found with UUID :uuid at :path.', ['uuid' => $uuid, 'path' => $chunkedStorageDisk->path($uuid)]));
         } else {
             $config     = $this->getUploadConfig($uuid);
             $chunkCount = $config['chunkCount'] ?? 0;
@@ -649,10 +670,7 @@ class Lodor
             $destinationFilename = $this->getUploadFilenameFromConfig($config);
 
             if ($destinationFilename === null || $destinationFilename === '') {
-                $this->setUploadStatus($uuid, 'error', __('Merging chunks...'), __('Unable to determine destination filename: insufficient data.'), 0);
-                $this->cleanupUpload($uuid);
-
-                return;
+                throw new InvalidArgumentException(__('Unable to determine destination filename for upload.'));
             }
 
             if ($completeStorageDisk->exists($destinationFilename)) {
@@ -686,7 +704,8 @@ class Lodor
                         $this->setUploadStatus($uuid,
                             'error',
                             __('Merging chunks...'),
-                            __('Missing chunk :missing_chunk of :total_chunks: expected file :missing_filename', ['missing_chunk' => $i + 1, 'total_chunks' => $chunkCount, 'missing_filename' => $absoluteChunkFilename]),
+                            __('Missing chunk :missing_chunk of :total_chunks: expected file :missing_filename',
+                                ['missing_chunk' => $i + 1, 'total_chunks' => $chunkCount, 'missing_filename' => $absoluteChunkFilename]),
                             100);
 
                         throw new FileNotFoundException(sprintf('File not found for chunk %d of %d: expected file %s', $i + 1, $chunkCount, $absoluteChunkFilename));
@@ -694,22 +713,25 @@ class Lodor
                 }
             } catch (Exception $e) {
                 // File/disk related error.
-                $this->setUploadStatus($uuid, 'error', __('Merging chunks...'), __(':exception_class while merging: :exception_message', ['exception_class' => get_class($e), 'exception_message' => $e->getMessage()], 100));
+                $this->setUploadStatus($uuid,
+                    'error',
+                    __('Merging chunks...'),
+                    __(':exception_class while merging: :exception_message', ['exception_class' => get_class($e), 'exception_message' => $e->getMessage()], 100));
 
                 throw new FileNotFoundException($e);
             } finally {
                 if ($sourceFileHandle ?? false) {
                     fclose($sourceFileHandle);
                 }
+
                 if ($destinationFileHandle ?? false) {
                     fclose($destinationFileHandle);
                 }
+
                 $chunkedStorageDisk->delete($destinationFilename);
             }
         }
 
-        $this->setUploadState($uuid, 'merge_cleanup');
         $this->setUploadDestinationFilename($uuid, $absoluteDestinationFilename);
-        $this->finishUpload($uuid);
     }
 }
