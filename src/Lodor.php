@@ -3,18 +3,18 @@
 namespace Cybex\Lodor;
 
 use Exception;
-use Illuminate\Routing\Controller;
-use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\Route;
 use voku\helper\ASCII;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 use UnexpectedValueException;
+use Illuminate\Routing\Router;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\File;
 use Cybex\Lodor\Events\FileUploaded;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Cybex\Lodor\Events\UploadFinished;
@@ -618,6 +618,14 @@ class Lodor
         return ASCII::clean($filename);
     }
 
+    /**
+     * Merges the chunks for the upload with the specified uuid.
+     *
+     * @param string $uuid
+     *
+     * @throws FileExistsException
+     * @throws FileNotFoundException
+     */
     public function mergeChunkedFile(string $uuid = '')
     {
         if (!$this->isChunked($uuid)) {
@@ -704,5 +712,4 @@ class Lodor
         $this->setUploadDestinationFilename($uuid, $absoluteDestinationFilename);
         $this->finishUpload($uuid);
     }
-
 }
