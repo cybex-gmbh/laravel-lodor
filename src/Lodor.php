@@ -581,7 +581,11 @@ class Lodor
     public function failUpload(string $uploadUuid, string $status, string $info, array $uploadInfo = [])
     {
         $this->setUploadStatus($uploadUuid, 'error', $status, $info, 100);
-        $this->cleanupUpload($uploadUuid);
+        try {
+            $this->cleanupUpload($uploadUuid);
+        } catch (Exception $exception) {
+            // Do nothing.
+        }
 
         event(new UploadFailed($uploadUuid, $info, $uploadInfo));
     }
