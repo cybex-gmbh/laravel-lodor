@@ -41,7 +41,7 @@ return [
     | the form request.
     |
     */
-    'filename' => 'original',
+    'filename' => env('LODOR_FILE_NAMING', 'original'),
 
     /*
     |--------------------------------------------------------------------------
@@ -60,7 +60,7 @@ return [
     | FileExistsException.
     |
     */
-    'file_exists_strategy' => 'rename',
+    'file_exists_strategy' => env('LODOR_FILE_EXISTS_STRATEGY', 'rename'),
 
     /*
     |--------------------------------------------------------------------------
@@ -75,32 +75,32 @@ return [
     |
     */
     'states' => [
-        // The server upload finished, but a listener is waiting for execution.
-        'server_upload_waiting' => [
-            'progress' => 75,
-            'state' => 'waiting',
-            'status' => 'Server upload finished. Waiting for processing...',
-            'info' => 'Processing upload with ID :uuid.',
-        ],
-
         'awaiting_merge' => [
-            'progress' => 50,
+            'progress' => env('LODOR_PROGRESS_SERVER_UPLOAD', 50),
             'state' => 'waiting',
             'status' => 'Chunked file upload complete.',
-            'info' => 'Waiting for chunks to be merged...',
+            'info' => 'Waiting for processing...',
         ],
 
         // The server starts merging chunks.
         'merging_chunks' => [
-            'progress' => 50,
-            'progress_end' => 75,
+            'progress' => env('LODOR_PROGRESS_SERVER_UPLOAD', 50),
+            'progress_end' => env('LODOR_PROGRESS_MERGED', 75),
             'state' => 'processing',
             'status' => 'Merging chunks...',
             'info' => 'Concatenating chunk :current_chunk of :total_chunks...',
         ],
 
+        // The server upload finished, but a listener is waiting for execution.
+        'server_upload_waiting' => [
+            'progress' => env('LODOR_PROGRESS_AWAIT_PROCESSING', 75),
+            'state' => 'waiting',
+            'status' => 'Server upload finished. Waiting for processing...',
+            'info' => 'Processing upload with ID :uuid.',
+        ],
+
         'merge_cleanup' => [
-            'progress' => 75,
+            'progress' => env('LODOR_PROGRESS_MERGED', 75),
             'state' => 'processing',
             'status' => 'Cleaning up...',
             'info' => 'Successfully concatenated all file parts.',
@@ -168,7 +168,7 @@ return [
     |
     */
 
-    'event_channel_name' => env('UPLOAD_EVENT_CHANNEL', 'upload'),
+    'event_channel_name' => env('LODOR_EVENT_CHANNEL', 'upload'),
 
     /*
     |--------------------------------------------------------------------------
@@ -180,7 +180,7 @@ return [
     |
     */
 
-    'default_upload_queue' => env('DEFAULT_UPLOAD_QUEUE', 'uploads'),
+    'default_upload_queue' => env('LODOR_DEFAULT_UPLOAD_QUEUE', 'uploads'),
 
     /*
     |--------------------------------------------------------------------------
@@ -194,7 +194,7 @@ return [
     |
     */
 
-    'default_cleanup_queue' => env('DEFAULT_UPLOAD_CLEANUP_QUEUE', 'default'),
+    'default_cleanup_queue' => env('LODOR_DEFAULT_CLEANUP_QUEUE', 'default'),
 
     /*
     |--------------------------------------------------------------------------
@@ -207,7 +207,7 @@ return [
     |
     */
 
-    'upload_cleanup_timeout' => env('UPLOAD_CLEANUP_TIMEOUT', 600),
+    'upload_cleanup_timeout' => env('LODOR_UPLOAD_CLEANUP_TIMEOUT', 600),
 
     /*
     |--------------------------------------------------------------------------
@@ -271,7 +271,7 @@ return [
         | MergeChunks listener (see option below).
         |
         */
-        'auto_merge_chunks' => true,
+        'auto_merge_chunks' => env('LODOR_AUTO_MERGE_CHUNKS', true),
 
         /*
         |--------------------------------------------------------------------------
@@ -307,7 +307,7 @@ return [
         | Note: only works on Laravel 7.15.0 and above.
         |
         */
-        'default_queue' => env('DEFAULT_UPLOAD_MERGE_QUEUE', 'uploads'),
+        'default_queue' => env('LODOR_DEFAULT_MERGE_QUEUE', 'uploads'),
     ],
 
 ];

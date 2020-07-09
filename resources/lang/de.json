@@ -12,6 +12,7 @@
 
     "Chunked file upload complete.": "Übertragung aller Dateiblöcke abeschlossen.",
     "Waiting for chunks to be merged...": "Warte auf Zusammenführung der Dateiblöcke...",
+    "Waiting for processing...": "Warte auf Verarbeitung...",
 
     "Upload complete.":  "Upload abgeschlossen.",
 

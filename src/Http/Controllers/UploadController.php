@@ -8,12 +8,15 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\Routing\Controller;
 use Cybex\Lodor\Events\UploadFailed;
+use Illuminate\Http\RedirectResponse;
 use Cybex\Lodor\Events\ChunkUploaded;
 use Cybex\Lodor\LodorFacade as Lodor;
 use Illuminate\Support\Facades\Storage;
 use Cybex\Lodor\Events\ChunkedFileUploaded;
+use Illuminate\Contracts\Foundation\Application;
 
 class UploadController extends Controller
 {
@@ -22,7 +25,7 @@ class UploadController extends Controller
      *
      * @param Request $request
      *
-     * @return \Illuminate\Contracts\Foundation\Application|JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @return Application|JsonResponse|RedirectResponse|Redirector
      */
     public function store(Request $request)
     {
@@ -59,7 +62,7 @@ class UploadController extends Controller
             $filename    = Lodor::getUploadFilenameFromRequest($uploadUuid, $request, $file);
 
             if ($filename === null || $filename === '') {
-                return $this->failUpload($request, $filename, $uploadUuid, __('Unexpected error: Unable to obtain original filename.'));
+                return $this->failUpload($request, $uploadUuid, __('Unexpected error: Unable to obtain original filename.'));
             }
 
             if ($storageDisk->exists($filename)) {
@@ -67,7 +70,7 @@ class UploadController extends Controller
                 $newFilename = Lodor::resolveFileExists($storageDisk, $filename);
 
                 if ($newFilename === null) {
-                    return $this->failUpload($request, null, $uploadUuid, __('The destination file :filename already exists.', ['filename' => $filename]));
+                    return $this->failUpload($request, $uploadUuid, __('The destination file :filename already exists.', ['filename' => $filename]));
                 }
 
                 $filename = $newFilename;
@@ -117,7 +120,7 @@ class UploadController extends Controller
         }
 
         if ($routeArray = Lodor::getRedirectRoute()) {
-            [$redirectRoute, $controller, $actionMethod] = $routeArray;
+            [, $controller, $actionMethod] = $routeArray;
             return $controller->callAction($actionMethod, [$request, true, $uploadUuid, $uploadInfo]);
         }
 
@@ -147,20 +150,14 @@ class UploadController extends Controller
      * @param string      $uploadUuid
      * @param string      $errorMessage
      *
-     * @return \Illuminate\Contracts\Foundation\Application|JsonResponse|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector|object
+     * @return Application|JsonResponse|RedirectResponse|Redirector|object
      */
-    protected function failUpload(Request $request, ?string $filename, string $uploadUuid, string $errorMessage)
+    protected function failUpload(Request $request, string $uploadUuid, string $errorMessage)
     {
-        Lodor::setUploadStatus($uploadUuid,
-            'error',
-            __('Server upload failed.'),
-            $errorMessage,
-            100);
-
-        event(new UploadFailed($uploadUuid, $errorMessage, []));
+        Lodor::failUpload($uploadUuid, __('Server upload failed.'), $errorMessage);
 
         if ($routeArray = Lodor::getRedirectRoute()) {
-            [$redirectRoute, $controller, $actionMethod] = $routeArray;
+            [, $controller, $actionMethod] = $routeArray;
             return $controller->callAction($actionMethod, [$request, false, $uploadUuid, [], $errorMessage]);
         }
 
