@@ -76,16 +76,16 @@ return [
     */
     'states' => [
         'awaiting_merge' => [
-            'progress' => 50,
+            'progress' => env('LODOR_PROGRESS_SERVER_UPLOAD', 50),
             'state' => 'waiting',
             'status' => 'Chunked file upload complete.',
-            'info' => 'Waiting for chunks to be merged...',
+            'info' => 'Waiting for processing...',
         ],
 
         // The server starts merging chunks.
         'merging_chunks' => [
-            'progress' => 50,
-            'progress_end' => 75,
+            'progress' => env('LODOR_PROGRESS_SERVER_UPLOAD', 50),
+            'progress_end' => env('LODOR_PROGRESS_MERGED', 75),
             'state' => 'processing',
             'status' => 'Merging chunks...',
             'info' => 'Concatenating chunk :current_chunk of :total_chunks...',
@@ -93,14 +93,14 @@ return [
 
         // The server upload finished, but a listener is waiting for execution.
         'server_upload_waiting' => [
-            'progress' => 75,
+            'progress' => env('LODOR_PROGRESS_AWAIT_PROCESSING', 75),
             'state' => 'waiting',
             'status' => 'Server upload finished. Waiting for processing...',
             'info' => 'Processing upload with ID :uuid.',
         ],
 
         'merge_cleanup' => [
-            'progress' => 75,
+            'progress' => env('LODOR_PROGRESS_MERGED', 75),
             'state' => 'processing',
             'status' => 'Cleaning up...',
             'info' => 'Successfully concatenated all file parts.',
