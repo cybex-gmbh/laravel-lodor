@@ -15,7 +15,7 @@ class ResumableJsChunkUploader extends ChunkUploader
      */
     public static function isChunkedRequest(Request $request): bool
     {
-        return $request->has(['resumableIdentifier', 'resumableTotalChunks', 'resumableChunkNumber']) && $request->resumableTotalChunks > 0;
+        return $request->has(['resumableIdentifier', 'resumableTotalChunks', 'resumableChunkNumber']) && $request->input('resumableTotalChunks', 0) > 0;
     }
 
     /**

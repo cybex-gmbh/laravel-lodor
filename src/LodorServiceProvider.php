@@ -2,7 +2,6 @@
 
 namespace Cybex\Lodor;
 
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Cybex\Lodor\Http\Controllers\UploadController;
@@ -23,11 +22,6 @@ class LodorServiceProvider extends ServiceProvider
                 __DIR__ . '/../config/lodor.php' => config_path('lodor.php'),
             ], 'config');
 
-            $this->publishes([
-                __DIR__.'/../resources/assets' => public_path('vendor/lodor'),
-            ], 'assets');
-
-            // Publishing the translation files.
             $this->publishes([
                 __DIR__ . '/../resources/lang' => resource_path('lang/vendor/lodor'),
             ], 'lang');

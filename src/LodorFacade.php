@@ -4,9 +4,6 @@ namespace Cybex\Lodor;
 
 use Illuminate\Support\Facades\Facade;
 
-/**
- * @see \Lupinitylabs\ChunkedUploads\Skeleton\SkeletonClass
- */
 class LodorFacade extends Facade
 {
     /**

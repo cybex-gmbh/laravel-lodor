@@ -15,7 +15,7 @@ class DropzoneChunkUploader extends ChunkUploader
      */
     public static function isChunkedRequest(Request $request): bool
     {
-        return $request->has(['dzuuid', 'dztotalchunkcount', 'dzchunkindex']) && $request->dztotalchunkcount > 0;;
+        return $request->has(['dzuuid', 'dztotalchunkcount', 'dzchunkindex']) && $request->input('dztotalchunkcount', 0) > 0;
     }
 
     /**

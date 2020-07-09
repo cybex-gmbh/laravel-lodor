@@ -75,6 +75,13 @@ class Lodor
         return route('lodor_poll');
     }
 
+    /**
+     * Returns the redirect route, if any is set, that gets called after an upload finished.
+     *
+     * @return array|null
+     *
+     * @throws Exception
+     */
     public function getRedirectRoute(): ?array
     {
         if (Route::has('lodor_uploaded') && $route = app(Router::class)->getRoutes()->getByName('lodor_uploaded')) {
@@ -82,7 +89,7 @@ class Lodor
             $actionMethod = $route->getActionMethod();
 
             if (!($controller instanceof Controller)) {
-                throw new \Exception('Invalid route definition: lodor_uploaded route is required to be handled by a controller action.');
+                throw new Exception('Invalid route definition: lodor_uploaded route is required to be handled by a controller action.');
             }
 
             return [$route, $controller, $actionMethod];
@@ -93,7 +100,7 @@ class Lodor
 
     /**
      * Returns the status record for the upload with the specified $uuid.
-     * The record is used in conjunction with a dropzone to poll the
+     * The record is used in conjunction with a Dropzone to poll the
      * status of a running upload via UploadController@poll.
      *
      * @param String $uuid
@@ -244,6 +251,7 @@ class Lodor
      * @param String $uuid
      *
      * @return array
+     *
      * @throws InvalidArgumentException
      */
     public function getUploadConfig(string $uuid): array
@@ -568,10 +576,11 @@ class Lodor
      * @param string $uploadUuid
      * @param string $status
      * @param string $info
+     * @param array  $uploadInfo
      */
     public function failUpload(string $uploadUuid, string $status, string $info, array $uploadInfo = [])
     {
-        $this->setUploadStatus($uploadUuid, 'error', $status, $info, 0);
+        $this->setUploadStatus($uploadUuid, 'error', $status, $info, 100);
         $this->cleanupUpload($uploadUuid);
 
         event(new UploadFailed($uploadUuid, $info, $uploadInfo));
