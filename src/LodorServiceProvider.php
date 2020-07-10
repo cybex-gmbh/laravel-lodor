@@ -53,7 +53,7 @@ class LodorServiceProvider extends ServiceProvider
      */
     protected function registerRoutes()
     {
-        $middlewareArray = config('lodor.route_middlewares');
+        $middlewareArray = config('lodor.route_middleware');
 
         // All uploads will go here.
         Route::post(config('lodor.upload_route_path', 'uploadmedia'), [UploadController::class, 'store'])->name('lodor_upload')->middleware($middlewareArray);
