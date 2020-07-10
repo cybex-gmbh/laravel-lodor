@@ -15,16 +15,18 @@ class LodorServiceProvider extends ServiceProvider
     {
         $this->registerDisks();
         $this->registerRoutes();
-        $this->loadJsonTranslationsFrom(__DIR__.'/../resources/lang');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/lodor.php' => config_path('lodor.php'),
-            ], 'config');
+            ],
+                'config');
 
             $this->publishes([
                 __DIR__ . '/../resources/lang' => resource_path('lang/vendor/lodor'),
-            ], 'lang');
+            ],
+                'lang');
         }
     }
 
@@ -40,9 +42,10 @@ class LodorServiceProvider extends ServiceProvider
         $this->app->register(EventServiceProvider::class);
 
         // Register the main class to use with the facade
-        $this->app->singleton('lodor', function () {
-            return new Lodor;
-        });
+        $this->app->singleton('lodor',
+            function () {
+                return new Lodor;
+            });
     }
 
     /**
@@ -50,11 +53,13 @@ class LodorServiceProvider extends ServiceProvider
      */
     protected function registerRoutes()
     {
+        $middlewareArray = config('lodor.route_middlewares');
+
         // All uploads will go here.
-        Route::post(config('lodor.upload_route_path', 'uploadmedia'), [UploadController::class, 'store'])->name('lodor_upload');
+        Route::post(config('lodor.upload_route_path', 'uploadmedia'), [UploadController::class, 'store'])->name('lodor_upload')->middleware($middlewareArray);
 
         // The frontend JS can poll this route to get information about the current upload(s).
-        Route::post(config('lodor.poll_route_path', 'uploadpoll'), [UploadController::class, 'poll'])->name('lodor_poll');
+        Route::post(config('lodor.poll_route_path', 'uploadpoll'), [UploadController::class, 'poll'])->name('lodor_poll')->middleware($middlewareArray);
     }
 
     /**

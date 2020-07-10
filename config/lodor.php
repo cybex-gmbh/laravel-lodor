@@ -27,6 +27,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Route Middlewares
+    |--------------------------------------------------------------------------
+    |
+    | Here you may customize middleware that will be applied to both the upload
+    | and polling routes. By default, web and auth middleware are active.
+    |
+    */
+    'route_middlewares' => [
+        'web',
+        'auth',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | File Naming
     |--------------------------------------------------------------------------
     |
