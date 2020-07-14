@@ -27,6 +27,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Route Middleware
+    |--------------------------------------------------------------------------
+    |
+    | Here you may customize middleware that will be applied to both the upload
+    | and polling routes. By default, web and auth middleware are active.
+    |
+    */
+    'route_middleware' => [
+        'web',
+        'auth',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | File Naming
     |--------------------------------------------------------------------------
     |
@@ -172,38 +186,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Upload Queue Name
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify the default queue name that should be used when
-    | processing uploads.
-    |
-    */
-
-    'default_upload_queue' => env('LODOR_DEFAULT_UPLOAD_QUEUE', 'uploads'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default Cleanup Queue Name
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify the default queue name that should be used for
-    | cleanup jobs. It might be desirable to keep this separated from the
-    | upload queue so that low priority cleanup jobs do not block high
-    | priority upload jobs.
-    |
-    */
-
-    'default_cleanup_queue' => env('LODOR_DEFAULT_CLEANUP_QUEUE', 'default'),
-
-    /*
-    |--------------------------------------------------------------------------
     | Upload Cleanup Timeout
     |--------------------------------------------------------------------------
     |
     | Here you may specify the amount of seconds to wait after the last status
     | update of an upload before it can be regarded as stalled and thus be
     | deleted by the cleanup job.
+    |
+    | Note: this is currently not in use and may be utilized by a cleanup cron
+    | or command in a later version of Lodor.
     |
     */
 
@@ -291,7 +282,7 @@ return [
         | cause the script to be killed and the upload to fail.
         |
         */
-        'run_async' => true,
+        'run_async' => env('LODOR_MERGE_ASYNC', true),
 
         /*
         |--------------------------------------------------------------------------
@@ -307,7 +298,6 @@ return [
         | Note: only works on Laravel 7.15.0 and above.
         |
         */
-        'default_queue' => env('LODOR_DEFAULT_MERGE_QUEUE', 'uploads'),
+        'default_queue' => env('LODOR_DEFAULT_MERGE_QUEUE', 'default'),
     ],
-
 ];

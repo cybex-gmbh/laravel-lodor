@@ -27,7 +27,7 @@ class MergeChunks implements ShouldQueue
      *
      * @var string
      */
-    public $queue = 'uploads';
+    public $queue = 'default';
 
     /**
      * Make sure that we only queue this listener if auto merging chunks and asynchronous merging are enabled.
