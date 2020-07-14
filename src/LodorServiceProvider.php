@@ -2,6 +2,7 @@
 
 namespace Cybex\Lodor;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Cybex\Lodor\Http\Controllers\UploadController;
@@ -53,7 +54,7 @@ class LodorServiceProvider extends ServiceProvider
      */
     protected function registerRoutes()
     {
-        $middlewareArray = config('lodor.route_middleware', []);
+        $middlewareArray = App::runningUnitTests() ? [] : config('lodor.route_middleware', []);
 
         // All uploads will go here.
         Route::post(config('lodor.upload_route_path', 'uploadmedia'), [UploadController::class, 'store'])->name('lodor_upload')->middleware($middlewareArray);
