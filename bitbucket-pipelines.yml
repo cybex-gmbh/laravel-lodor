@@ -8,6 +8,8 @@ image: php:7.2
 pipelines:
   default:
     - step:
+        caches:
+          - composer
         script:
           # Installing first the libraries necessary to configure and install gd
           - apt-get update
@@ -17,10 +19,6 @@ pipelines:
           - docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
           - docker-php-ext-install -j$(nproc) gd
           - docker-php-ext-enable gd
-    - step:
-        caches:
-          - composer
-        script:
           - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
           - composer install
           - vendor/bin/phpunit
