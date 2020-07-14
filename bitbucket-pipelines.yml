@@ -8,6 +8,15 @@ image: php:7.2
 pipelines:
   default:
     - step:
+        script:
+          # Installing first the libraries necessary to configure and install gd
+          - apt-get update
+          - apt-get upgrade -y
+          - apt-get install -y --no-install-recommends libfreetype6-dev libz-dev libpq-dev libjpeg-dev libpng-dev libfreetype6-dev
+          # Now we can configure and install the extension
+          - docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+          - docker-php-ext-install -j$(nproc) gd
+    - step:
         caches:
           - composer
         script:
