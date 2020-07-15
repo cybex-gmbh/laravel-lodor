@@ -3,8 +3,8 @@
 namespace Cybex\Lodor;
 
 use Cybex\Lodor\Events\UploadFinished;
-use Cybex\Lodor\Listeners\CleanupUpload;
 use Cybex\Lodor\Listeners\MergeChunks;
+use Cybex\Lodor\Listeners\CleanupUpload;
 use Cybex\Lodor\Events\ChunkedFileUploaded;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
