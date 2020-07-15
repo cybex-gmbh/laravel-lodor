@@ -1,7 +1,7 @@
 # Laravel Lodor
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/cybex/laravel-lodor.svg?style=flat-square)](https://packagist.org/packages/cybex/laravel-lodor)
-[![Total Downloads](https://img.shields.io/packagist/dt/cybex/laravel-lodor.svg?style=flat-square)](https://packagist.org/packages/cybex/laravel-lodor)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
+[![Total Downloads](https://img.shields.io/packagist/dt/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
 [![Bitbucket issues](https://img.shields.io/bitbucket/issues/cybexgmbh/laravel-lodor.svg)](https://Bitbucket.org/cybexgmbh/laravel-lodor/issues/)
 [![Bitbucket issues](https://img.shields.io/bitbucket/pipelines/cybexgmbh/laravel-lodor.svg)]()
 [![Laravel Version](https://img.shields.io/badge/Minimum_Laravel_Version-6.x-red.svg)](https://laravel.com/docs/6.x)
