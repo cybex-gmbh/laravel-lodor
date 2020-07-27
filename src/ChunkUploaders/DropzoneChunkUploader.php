@@ -2,65 +2,33 @@
 
 namespace Cybex\Lodor\ChunkUploaders;
 
-use Illuminate\Http\Request;
-
 class DropzoneChunkUploader extends ChunkUploader
 {
     /**
-     * Returns true if the specified request seems to be a chunked upload that can be handled by this chunk uploader.
+     * Request key name that is used for the upload uuid.
      *
-     * @param Request $request
-     *
-     * @return bool
+     * @var string
      */
-    public static function isChunkedRequest(Request $request): bool
-    {
-        return $request->has(['dzuuid', 'dztotalchunkcount', 'dzchunkindex']) && $request->input('dztotalchunkcount', 0) > 0;
-    }
+    protected static $keyUuid = 'dzuuid';
 
     /**
-     * Returns the total number of chunks in this upload.
+     * Request key name specifying the total number of chunks of the upload.
      *
-     * @param int $default
-     *
-     * @return int
+     * @var string
      */
-    public function getChunkCount(int $default = 0): int
-    {
-        return $this->request->input('dztotalchunkcount', 0);
-    }
+    protected static $keyChunkCount = 'dztotalchunkcount';
 
     /**
-     * Returns the Uuid for this upload, if any.
+     * Request key name specifying the index of the currently transferred chunk.
      *
-     * @param string $default
-     *
-     * @return string|null
+     * @var string
      */
-    public function getUploadUuid(string $default = null): ?string
-    {
-        return $this->request->input('dzuuid', $default);
-    }
+    protected static $keyChunkIndex = 'dzchunkindex';
 
     /**
-     * Returns the file size of the current chunk.
+     * Request key name specifying the chunk size in bytes.
      *
-     * @param int $default
-     *
-     * @return int
+     * @var string
      */
-    public function getChunkSize(int $default = 0): int
-    {
-        return $this->request->input('dzchunksize', $default);
-    }
-
-    /**
-     * Returns the zero-based index of the current chunk or null.
-     *
-     * @return int|null
-     */
-    public function getChunkIndex(): ?int
-    {
-        return $this->request->input('dzchunkindex');
-    }
+    protected static $keyChunkSize = 'dzchunksize';
 }

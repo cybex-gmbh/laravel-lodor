@@ -78,6 +78,71 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Filesystem Disks
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure the disks that are used for chunked uploads and
+    | single and merged uploads. Alternatively, you may change the disk_chunked
+    | and disk_uploads settings to use custom disks you configured in your
+    | app's filesystems.php.
+    |
+    */
+
+    'disks'        => [
+        // This is where the file chunks are saved until they are merged.
+        'lodor_chunked' => [
+            'driver' => 'local',
+            'root'   => storage_path('lodor/chunked'),
+        ],
+
+        // This is where non-chunked uploads go, and where the chunked uploads go after merging.
+        'lodor_uploads' => [
+            'driver' => 'local',
+            'root'   => storage_path('lodor/uploads'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Disk Names
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure the disk names that are used for chunked or single
+    | uploads. You can use the same disk for single and chunked uploads: single
+    | uploads will be files in that disk, while chunked uploads are stored in
+    | subfolders until they are merged.
+    |
+    | If you change these settings, make sure the disks are properly configured
+    | in your app's filesystems.php.
+    |
+    */
+    'disk_uploads'  => env('LODOR_DISK_UPLOADS', 'lodor_uploads'),
+    'disk_chunked' => env('LODOR_DISK_CHUNKED', 'lodor_chunked'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Information Cache Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Here you may customize the cache use for the uploaded file details and
+    | the upload status. The prefix option specifies the prefix that is used
+    | for the cache entries and the ttl determines how long the cache items
+    | should live before they expire.
+    |
+    */
+    'cache' => [
+        'upload_config' => [
+            'prefix' => 'LODOR',
+            'ttl' => 3600,
+        ],
+        'upload_status' => [
+            'prefix' => 'LODOR_STATUS',
+            'ttl' => 3600,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | State Control
     |--------------------------------------------------------------------------
     |
@@ -131,49 +196,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Filesystem Disks
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure the disks that are used for chunked uploads and
-    | single and merged uploads. Alternatively, you may change the disk_chunked
-    | and disk_uploads settings to use custom disks you configured in your
-    | app's filesystems.php.
-    |
-    */
-
-    'disks'        => [
-        // This is where the file chunks are saved until they are merged.
-        'lodor_chunked' => [
-            'driver' => 'local',
-            'root'   => storage_path('lodor/chunked'),
-        ],
-
-        // This is where non-chunked uploads go, and where the chunked uploads go after merging.
-        'lodor_uploads' => [
-            'driver' => 'local',
-            'root'   => storage_path('lodor/uploads'),
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default Disk Names
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure the disk names that are used for chunked or single
-    | uploads. You can use the same disk for single and chunked uploads: single
-    | uploads will be files in that disk, while chunked uploads are stored in
-    | subfolders until they are merged.
-    |
-    | If you change these settings, make sure the disks are properly configured
-    | in your app's filesystems.php.
-    |
-    */
-    'disk_uploads'  => env('LODOR_DISK_UPLOADS', 'lodor_uploads'),
-    'disk_chunked' => env('LODOR_DISK_CHUNKED', 'lodor_chunked'),
-
-    /*
-    |--------------------------------------------------------------------------
     | Event Broadcast Channel Name
     |--------------------------------------------------------------------------
     |
@@ -199,28 +221,6 @@ return [
     */
 
     'upload_cleanup_timeout' => env('LODOR_UPLOAD_CLEANUP_TIMEOUT', 600),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Information Cache Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may customize the cache use for the uploaded file details and
-    | the upload status. The prefix option specifies the prefix that is used
-    | for the cache entries and the ttl determines how long the cache items
-    | should live before they expire.
-    |
-    */
-    'cache' => [
-        'upload_config' => [
-            'prefix' => 'LODOR',
-            'ttl' => 3600,
-        ],
-        'upload_status' => [
-            'prefix' => 'LODOR_STATUS',
-            'ttl' => 3600,
-        ],
-    ],
 
     /*
     |--------------------------------------------------------------------------

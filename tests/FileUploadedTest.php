@@ -2,18 +2,18 @@
 
 namespace Cybex\Lodor\Tests;
 
+use Ramsey\Uuid\Uuid;
+use voku\helper\ASCII;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Orchestra\Testbench\TestCase;
+use Illuminate\Support\Facades\App;
 use Cybex\Lodor\Events\FileUploaded;
 use Cybex\Lodor\Events\UploadFailed;
 use Cybex\Lodor\LodorFacade as Lodor;
 use Cybex\Lodor\LodorServiceProvider;
-use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
-use Orchestra\Testbench\TestCase;
-use Ramsey\Uuid\Uuid;
-use voku\helper\ASCII;
+use Illuminate\Support\Facades\Config;
 
 class FileUploadedTest extends TestCase
 {

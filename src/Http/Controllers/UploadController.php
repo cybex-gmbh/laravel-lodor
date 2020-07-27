@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Routing\Controller;
-use Cybex\Lodor\Events\UploadFailed;
 use Illuminate\Http\RedirectResponse;
 use Cybex\Lodor\Events\ChunkUploaded;
 use Cybex\Lodor\LodorFacade as Lodor;

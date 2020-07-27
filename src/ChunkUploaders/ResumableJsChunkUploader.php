@@ -2,57 +2,35 @@
 
 namespace Cybex\Lodor\ChunkUploaders;
 
-use Illuminate\Http\Request;
-
 class ResumableJsChunkUploader extends ChunkUploader
 {
     /**
-     * Returns true if the specified request seems to be a chunked upload that can be handled by this chunk uploader.
+     * Request key name that is used for the upload uuid.
      *
-     * @param Request $request
-     *
-     * @return bool
+     * @var string
      */
-    public static function isChunkedRequest(Request $request): bool
-    {
-        return $request->has(['resumableIdentifier', 'resumableTotalChunks', 'resumableChunkNumber']) && $request->input('resumableTotalChunks', 0) > 0;
-    }
+    protected static $keyUuid = 'resumableIdentifier';
 
     /**
-     * Returns the total number of chunks in this upload.
+     * Request key name specifying the total number of chunks of the upload.
      *
-     * @param int $default
-     *
-     * @return int
+     * @var string
      */
-    public function getChunkCount(int $default = 0): int
-    {
-        return $this->request->input('resumableTotalChunks', 0);
-    }
+    protected static $keyChunkCount = 'resumableTotalChunks';
 
     /**
-     * Returns the Uuid for this upload, if any.
+     * Request key name specifying the index of the currently transferred chunk.
      *
-     * @param string $default
-     *
-     * @return string|null
+     * @var string
      */
-    public function getUploadUuid(string $default = null): ?string
-    {
-        return $this->request->input('resumableIdentifier', $default);
-    }
+    protected static $keyChunkIndex = 'resumableChunkNumber';
 
     /**
-     * Returns the file size of the current chunk.
+     * Request key name specifying the chunk size in bytes.
      *
-     * @param int $default
-     *
-     * @return int
+     * @var string
      */
-    public function getChunkSize(int $default = 0): int
-    {
-        return $this->request->input('resumableChunkSize', $default);
-    }
+    protected static $keyChunkSize = 'resumableChunkSize';
 
     /**
      * Returns the index of the current chunk or null.
@@ -62,7 +40,7 @@ class ResumableJsChunkUploader extends ChunkUploader
      */
     public function getChunkIndex(): ?int
     {
-        $chunkIndex = $this->request->input('resumableChunkNumber');
+        $chunkIndex = $this->request->input(self::$keyChunkIndex);
 
         return $chunkIndex === null ? null : $chunkIndex - 1;
     }
