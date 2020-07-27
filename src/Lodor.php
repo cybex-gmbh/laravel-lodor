@@ -266,6 +266,22 @@ class Lodor
     }
 
     /**
+     * Checks if the upload config exists for the specified uuid.
+     *
+     * @param String $uuid
+     *
+     * @return bool
+     *
+     */
+    public function hasUploadConfig(string $uuid): bool
+    {
+        $cachePrefix = config('lodor.cache.upload_config.prefix', 'LODOR');
+        $cacheKey    = sprintf('%s_%s', $cachePrefix, $uuid);
+
+        return Cache::has($cacheKey);
+    }
+
+    /**
      * Saves the config record for the upload with the specified $uuid.
      *
      * @param String $uuid
@@ -435,8 +451,18 @@ class Lodor
      */
     public function isChunked(string $uuid): bool
     {
-        $config = $this->getUploadConfig($uuid);
-        return $config['chunked'] ?? false;
+        if ($this->hasUploadConfig($uuid)) {
+            $config = $this->getUploadConfig($uuid);
+            return $config['chunked'] ?? false;
+        }
+
+        $storageDiskChunked = Storage::disk(Lodor::getChunkedUploadDiskName());
+
+        if ($storageDiskChunked->exists($uuid)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

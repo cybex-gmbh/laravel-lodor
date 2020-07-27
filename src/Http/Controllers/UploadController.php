@@ -145,10 +145,9 @@ class UploadController extends Controller
     }
 
     /**
-     * @param Request     $request
-     * @param string|null $filename
-     * @param string      $uploadUuid
-     * @param string      $errorMessage
+     * @param Request $request
+     * @param string  $uploadUuid
+     * @param string  $errorMessage
      *
      * @return Application|JsonResponse|RedirectResponse|Redirector|object
      */
