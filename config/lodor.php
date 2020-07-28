@@ -186,6 +186,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Automatic cleanup
+    |--------------------------------------------------------------------------
+    |
+    | This setting determines whether Lodor should automatically clean up files
+    | and cache entries after itself.
+    |
+    */
+    'auto_cleanup' => env('LODOR_AUTO_CLEANUP', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Upload Cleanup Timeout
     |--------------------------------------------------------------------------
     |
