@@ -24,6 +24,8 @@ class CleanupUpload
      */
     public function handle(UploadFinished $event)
     {
-        Lodor::cleanupUpload($event->uuid, $event->metadata['chunked'] ?? null);
+        if (config('lodor.auto_cleanup', true)) {
+            Lodor::cleanupUpload($event->uuid, $event->metadata['chunked'] ?? null);
+        }
     }
 }
