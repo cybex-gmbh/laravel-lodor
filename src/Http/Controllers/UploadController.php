@@ -2,20 +2,20 @@
 
 namespace Cybex\Lodor\Http\Controllers;
 
-use Exception;
-use Ramsey\Uuid\Uuid;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Routing\Redirector;
-use Illuminate\Routing\Controller;
-use Illuminate\Http\RedirectResponse;
+use Cybex\Lodor\Events\ChunkedFileUploaded;
 use Cybex\Lodor\Events\ChunkUploaded;
 use Cybex\Lodor\LodorFacade as Lodor;
-use Illuminate\Support\Facades\Storage;
-use Cybex\Lodor\Events\ChunkedFileUploaded;
+use Exception;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Routing\Redirector;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Ramsey\Uuid\Uuid;
 
 class UploadController extends Controller
 {

@@ -2,10 +2,10 @@
 
 namespace Cybex\Lodor;
 
+use Cybex\Lodor\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Cybex\Lodor\Http\Controllers\UploadController;
 
 class LodorServiceProvider extends ServiceProvider
 {

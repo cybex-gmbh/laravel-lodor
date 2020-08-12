@@ -2,10 +2,10 @@
 
 namespace App\Listeners;
 
-use Exception;
 use Cybex\Lodor\Events\FileUploaded;
-use Cybex\Lodor\LodorFacade as Lodor;
 use Cybex\Lodor\Events\UploadFinished;
+use Cybex\Lodor\LodorFacade as Lodor;
+use Exception;
 
 /**
  * This listener is for demonstration purposes and will be called after an upload successfully finished.
@@ -41,16 +41,16 @@ class ProcessUploadedFile // implements ShouldQueue
      * @return void
      * @throws Exception
      */
-    public function handle(FileUploaded $event) {
-        $uuid = $event->uuid;
+    public function handle(FileUploaded $event)
+    {
+        $uuid     = $event->uuid;
         $metadata = $event->metadata;
 
         // You are also responsible to post updates on the status of the process using Lodor::setUploadStatus()
         // to keep the frontend up to date on the progress and any info you want to publish along with it.
         // After the server upload finishes, the upload is put in "waiting" state until the listener(s)
         // process(es) the upload and set the status to "done" state.
-        Lodor::setUploadStatus(
-            $event->uuid,
+        Lodor::setUploadStatus($event->uuid,
             'done',
             __('Server upload finished.'),
             __('Upload complete.', ['uuid' => $uuid]),

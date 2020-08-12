@@ -6,7 +6,6 @@ use Cybex\Lodor\Events\ChunkedFileUploaded;
 use Cybex\Lodor\Events\ChunkUploaded;
 use Cybex\Lodor\Events\FileUploaded;
 use Cybex\Lodor\Events\UploadFailed;
-use Cybex\Lodor\Events\UploadFinished;
 use Cybex\Lodor\Listeners\MergeChunks;
 use Cybex\Lodor\LodorFacade as Lodor;
 use Cybex\Lodor\LodorServiceProvider;
@@ -161,9 +160,10 @@ class ChunkUploadTest extends TestCase
 
         $this->assertFileExists($fakeUploadStorage->path('syncvideo.avi'), 'The merged file was not found.');
 
-        Queue::assertNotPushed(CallQueuedListener::class, function ($listener) {
-            return $listener->class === MergeChunks::class;
-        });
+        Queue::assertNotPushed(CallQueuedListener::class,
+            function ($listener) {
+                return $listener->class === MergeChunks::class;
+            });
     }
 
     /**
@@ -180,11 +180,11 @@ class ChunkUploadTest extends TestCase
 
         $this->assertFileNotExists($fakeUploadStorage->path('automerge.avi'), 'The file was merged despite auto_merge_chunks was set to false.');
 
-        Queue::assertNotPushed(CallQueuedListener::class, function ($listener) {
-            return $listener->class === MergeChunks::class;
-        });
+        Queue::assertNotPushed(CallQueuedListener::class,
+            function ($listener) {
+                return $listener->class === MergeChunks::class;
+            });
     }
-
 
     /**
      * @test
