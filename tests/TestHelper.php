@@ -9,7 +9,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Ramsey\Uuid\Uuid;
 
-class TestHelper {
+class TestHelper
+{
     /**
      * @return \Illuminate\Contracts\Filesystem\Filesystem
      */
@@ -29,7 +30,7 @@ class TestHelper {
     public static function createFileChunks(string $filename, int $filesize, int $numberOfChunks, int $width = 0, int $height = 0): Collection
     {
         $imageFiles = collect();
-        $chunkSize = floor($filesize / $numberOfChunks);
+        $chunkSize  = floor($filesize / $numberOfChunks);
         while ($filesize > 0) {
             $filesize -= $chunkSize;
 
@@ -48,23 +49,27 @@ class TestHelper {
     public static function getChunkParametersForDropzone(int $totalChunks, int $currentChunk, string $uploadUuid = null)
     {
         return [
-            'dzuuid' => $uploadUuid ?? Uuid::uuid4()->toString(),
+            'dzuuid'            => $uploadUuid ?? Uuid::uuid4()->toString(),
             'dztotalchunkcount' => $totalChunks,
-            'dzchunkindex' => $currentChunk,
+            'dzchunkindex'      => $currentChunk,
         ];
     }
+
     public static function getChunkParametersForResumableJs(int $totalChunks, int $currentChunk, string $uploadUuid = null)
     {
         return [
-            'dzuuid' => $uploadUuid ?? Uuid::uuid4()->toString(),
+            'dzuuid'            => $uploadUuid ?? Uuid::uuid4()->toString(),
             'dztotalchunkcount' => $totalChunks,
-            'dzchunkindex' => $currentChunk,
+            'dzchunkindex'      => $currentChunk,
         ];
     }
 }
 
-class LodorFilenameSanitizer {
-    function getFilename(string $uuid, string $requestFilename, string $originalFilename, string $originalExtension, UploadedFile $file = null, Request $request = null, array $config = null) {
+class LodorFilenameSanitizer
+{
+    function getFilename(
+        string $uuid, string $requestFilename, string $originalFilename, string $originalExtension, UploadedFile $file = null, Request $request = null, array $config = null
+    ) {
         return $uuid . '-binding';
     }
 }

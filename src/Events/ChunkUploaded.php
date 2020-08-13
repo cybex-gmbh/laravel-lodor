@@ -3,10 +3,10 @@
 namespace Cybex\Lodor\Events;
 
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Queue\SerializesModels;
 
 class ChunkUploaded
 {
@@ -40,9 +40,9 @@ class ChunkUploaded
      */
     public function __construct(string $uuid, int $chunkIndex, array $metadata)
     {
-        $this->uuid = $uuid;
+        $this->uuid       = $uuid;
         $this->chunkIndex = $chunkIndex;
-        $this->metadata = $metadata;
+        $this->metadata   = $metadata;
     }
 
     /**

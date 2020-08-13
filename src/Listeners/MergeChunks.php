@@ -2,14 +2,14 @@
 
 namespace Cybex\Lodor\Listeners;
 
+use Cybex\Lodor\Events\ChunkedFileUploaded;
+use Cybex\Lodor\LodorFacade as Lodor;
 use Exception;
 use Illuminate\Config\Repository;
-use Cybex\Lodor\LodorFacade as Lodor;
-use Illuminate\Queue\InteractsWithQueue;
-use Cybex\Lodor\Events\ChunkedFileUploaded;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Queue\InteractsWithQueue;
 
 class MergeChunks implements ShouldQueue
 {
