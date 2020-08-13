@@ -2,7 +2,6 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
 ![Github build status](https://github.com/cybex-gmbh/laravel-lodor/workflows/tests/badge.svg)
-[![Travis CI Build Status](https://travis-ci.com/cybex-gmbh/laravel-lodor.svg?branch=master)](https://travis-ci.com/github/cybex-gmbh/laravel-lodor)
 [![Github all releases](https://img.shields.io/github/downloads/cybex-gmbh/laravel-lodor/total.svg)](https://github.com/cybex-gmbh/laravel-lodor/releases/)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/pull/)
 [![GitHub issues](https://img.shields.io/github/issues/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/issues/)
