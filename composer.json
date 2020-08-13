@@ -8,7 +8,7 @@
         "resumablejs",
         "cybex"
     ],
-    "homepage": "https://bitbucket.org/cybexgmbh/laravel-lodor",
+    "homepage": "https://github.com/cybex-gmbh/laravel-lodor",
     "license": "MIT",
     "type": "library",
     "authors": [

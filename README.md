@@ -1,12 +1,13 @@
 # Laravel Lodor
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
-[![Total Downloads](https://img.shields.io/packagist/dt/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
-[![Bitbucket issues](https://img.shields.io/bitbucket/issues/cybexgmbh/laravel-lodor.svg)](https://Bitbucket.org/cybexgmbh/laravel-lodor/issues/)
-[![Bitbucket issues](https://img.shields.io/bitbucket/pipelines/cybexgmbh/laravel-lodor.svg)]()
+[![Github all releases](https://img.shields.io/github/downloads/cybex-gmbh/laravel-lodor/total.svg)](https://github.com/cybex-gmbh/laravel-lodor/releases/)
+[![GitHub pull-requests](https://img.shields.io/github/issues-pr/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/pull/)
+[![GitHub issues](https://img.shields.io/github/issues/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/issues/)
+[![GitHub contributors](https://img.shields.io/github/contributors/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/graphs/contributors/)
 [![Laravel Version](https://img.shields.io/badge/Minimum_Laravel_Version-6.x-red.svg)](https://laravel.com/docs/6.x)
 
-This package for Laravel 6.x or newer provides an easy way to implement simple and chunked uploading from frontend libraries like DropzoneJS or ResumableJS and implement custom synchronous or asynchronous post-processing through (queued) listeners thanks to its use of Laravel Events.
+This package for Laravel 6.x or newer provides an easy way to implement simple as well as chunked uploading from frontend libraries like DropzoneJS or ResumableJS and implement custom synchronous or asynchronous post-processing through (queued) listeners thanks to its use of Laravel Events.
 
 The package is not available for older Laravel versions because the support for versions below 6.0.0 has run out. 
 
@@ -80,7 +81,6 @@ The available options with their corresponding env settings and defaults are:
 | disk_uploads                   | LODOR_DISK_UPLOADS           | lodor_uploads   | Name of the disk to be used for storing the final uploads.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | disk_chunked                   | LODOR_DISK_CHUNKED           | lodor_chunked   | Name of the disk to use for storing upload chunks.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | event_channel_name             | LODOR_EVENT_CHANNEL          | upload          | Name of the channel to use for events.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| auto_cleanup                   | LODOR_AUTO_CLEANUP           | true            | If set to `true`, _Lodor_ will automatically cleanup temporary files and cache entries for finished and failed uploads. Otherwise you will have to take care of that yourself, e.g. by calling `Lodor::cleanupUpload($uuid)`.
 | upload_cleanup_timeout         | LODOR_UPLOAD_CLEANUP_TIMEOUT | 600             | Amount of seconds to wait after the last status update of an upload before it is considered safe to be deleted by the cleanup (currently not in use).                                                                                                                                                                                                                                                                                                                                                                                    |
 | cache                          |                              |                 | `upload_config` specifies the `prefix` and default `ttl` (time to live) for the details on the uploaded file that are saved in the Cache. `upload_status` specifies the same for the status entries that are used to provide the polling functionality.                                                                                                                                                                                                                                                                                  |
 | merge_chunks                   |                              |                 | Settings for the process of merging the chunks of an upload into a single file.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -139,8 +139,9 @@ If you discover any security related issues, please email info@lupinitylabs.com 
 
 ## Credits
 
+- [Cybex GmbH](https://github.com/cybex-gmbh)
 - [Oliver Matla](https://github.com/lupinitylabs)
-- [Cybex GmbH](https://bitbucket.org/cybexgmbh)
+
 
 ## License
 

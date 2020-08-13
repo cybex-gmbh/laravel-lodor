@@ -2,8 +2,8 @@
 
 namespace Cybex\Lodor\Listeners;
 
-use Cybex\Lodor\LodorFacade as Lodor;
 use Cybex\Lodor\Events\UploadFinished;
+use Cybex\Lodor\LodorFacade as Lodor;
 
 /**
  * Class CleanupUpload

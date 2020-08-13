@@ -2,29 +2,29 @@
 
 namespace Cybex\Lodor;
 
-use Exception;
-use voku\helper\ASCII;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use InvalidArgumentException;
-use UnexpectedValueException;
-use Illuminate\Routing\Router;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Routing\Controller;
+use Cybex\Lodor\ChunkUploaders\ChunkUploader;
 use Cybex\Lodor\Events\FileUploaded;
 use Cybex\Lodor\Events\UploadFailed;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Route;
 use Cybex\Lodor\Events\UploadFinished;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Filesystem\FilesystemAdapter;
-use Cybex\Lodor\ChunkUploaders\ChunkUploader;
 use Cybex\Lodor\Exceptions\UploadNotFoundException;
+use Exception;
 use Illuminate\Contracts\Filesystem\FileExistsException;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Routing\Controller;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
+use UnexpectedValueException;
+use voku\helper\ASCII;
 
 class Lodor
 {
@@ -514,8 +514,9 @@ class Lodor
      *
      * @return string
      */
-    public function getUploadFilename(string $uuid, string $requestFilename, string $originalFilename, string $originalExtension, UploadedFile $file = null, Request $request = null, array $config = null): string
-    {
+    public function getUploadFilename(
+        string $uuid, string $requestFilename, string $originalFilename, string $originalExtension, UploadedFile $file = null, Request $request = null, array $config = null
+    ): string {
         $originalFilename  = $this->cleanFilename($originalFilename);
         $originalExtension = $this->cleanFilename($originalExtension);
         $requestFilename   = $this->cleanFilename($requestFilename);
