@@ -1,11 +1,10 @@
 # Laravel Lodor
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
-[![Packagist Downloads](https://img.shields.io/packagist/dm/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
 ![Github build status](https://github.com/cybex-gmbh/laravel-lodor/workflows/tests/badge.svg)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/pull/)
 [![GitHub issues](https://img.shields.io/github/issues/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/issues/)
-[![Packagist Downloads](https://img.shields.io/packagist/dt/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
 [![GitHub contributors](https://img.shields.io/github/contributors/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/graphs/contributors/)
 [![Laravel Version](https://img.shields.io/badge/Minimum_Laravel_Version-6.x-red.svg)](https://laravel.com/docs/6.x)
 
