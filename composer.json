@@ -1,5 +1,5 @@
 {
-    "name": "cybex-gmbh/laravel-lodor",
+    "name": "cybex/laravel-lodor",
     "description": "Provides easy support for processing chunked uploads in Laravel.",
     "keywords": [
         "laravel-lodor",
