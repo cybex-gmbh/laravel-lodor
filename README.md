@@ -39,7 +39,7 @@ To get started with a simple HTML file upload, the only thing you really have to
 ``` html
 <form id="upload-form" enctype="multipart/form-data" method="post" action="{{ Lodor::getUploadRoute() }}">
     @csrf
-    <label for="file">Upload a file with Lodor:</label>
+    <label for="file-input">Upload a file with Lodor:</label>
     <input type="file" name="file" id="file-input" multiple />
     <input type="submit">
 </form>
