@@ -53,6 +53,35 @@ The HTML form above will upload the file to your storage directory and, by defau
     
 This setup is useful for asynchronous uploads using Javascripts, particularly when using Javascript libraries like [Dropzone.js](https://www.dropzonejs.com) or [Resumable.js](http://www.resumablejs.com).
 
+### Redirecting to a Controller after Upload
+   
+If you want to process the form yourself instead after the upload completed, you may define a named route by the name of `lodor_uploaded` like this:
+
+    Route::post('/uploaded')->uses('SomeController@uploaded')->name('lodor_uploaded');
+
+If this named route exists, Lodor will automatically redirect the request to the specified controller action instead of returning a JSON response. The controller method should be declared as follows:
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
+class SomeController extends Controller 
+{
+   function uploaded(Request $request, bool $success, string $uuid, array $metadata, string $errorMessage = null) {
+        // Do something here and handle the request returning some response, view or redirect.
+    }
+}
+```
+* `$request` contains all request data of the file upload form.
+* `$success` is `true` if the upload succeeded, and `false` if not.
+* `$uuid` contains the unique id of the upload.
+* `$metadata` is an array containing detail info about the uploaded file.
+* `$errormessage` contains the error message if the upload failed or is null otherwise.
+
 ### Chunked uploads
 
 _Lodor_ automatically merges upload chunks back into a single file. To prevent interruptions due to exceeding the maximum execution time for PHP scripts, _Lodor_ uses worker queues by default. If you cannot or do not wish to use workers, you should set the `LODOR_MERGE_ASYNC=false` environment variable or set the `merge_chunks.run_async` config setting to false (see [Configuration](#Configuration) for details). 
@@ -89,36 +118,6 @@ The available options with their corresponding env settings and defaults are:
 | merge_chunks.auto_merge_chunks | LODOR_AUTO_MERGE_CHUNKS      | true            | If set to `true`, _Lodor_ will automatically merge the chunks back to one single file and store it in the `disk_uploads` disk. If set to `false`, the upload process will finish after uploading all chunks to the server. This is useful if you want to re-use the chunks, e.g. for forwarding them to a different server or if you want to implement your own merge algorithm by registering a listener for the `FileUploaded` event.                                                                                                  |
 | merge_chunks.run_async         | LODOR_MERGE_ASYNC            | true            | If set to `true`, the merge process will queue on the `merge_chunks.default_queue` and will wait for the worker to process the job. If you don't want to use worker queues, you can set this to `false` to merge the chunks immediately after uploading. __Warning__: this merges all chunks of an upload immediately after uploading the last chunk. For large chunks or slow transfers, this may exceed the maximum execution time for script execution. You should only set this option to false if you are not concerned about this. |
 | merge_chunks.default_queue     | LODOR_DEFAULT_MERGE_QUEUE    | default         | You may set a different queue name for the merge jobs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-
-
-### Redirecting to a Controller after Upload
-   
-If you want to process the form yourself instead after the upload completed, you may define a named route by the name of `lodor_uploaded` like this:
-
-    Route::post('/uploaded')->uses('SomeController@uploaded')->name('lodor_uploaded');
-
-If this named route exists, Lodor will automatically redirect the request to the specified controller action instead of returning a JSON response. The controller method should be declared as follows:
-
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-
-class SomeController extends Controller 
-{
-   function uploaded(Request $request, bool $success, string $uuid, array $metadata, string $errorMessage = null) {
-        // Do something here and handle the request returning some response, view or redirect.
-    }
-}
-```
-* `$request` contains all request data of the file upload form.
-* `$success` is `true` if the upload succeeded, and `false` if not.
-* `$uuid` contains the unique id of the upload.
-* `$metadata` is an array containing detail info about the uploaded file.
-* `$errormessage` contains the error message if the upload failed or is null otherwise.
 
 ### Testing
 
