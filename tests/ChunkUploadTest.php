@@ -155,15 +155,20 @@ class ChunkUploadTest extends TestCase
         Queue::fake();
 
         Config::set('lodor.merge_chunks.run_async', false);
+        Config::set('lodor.auto_cleanup', false);
+        Config::set('lodor.auto_cleanup_chunks', true);
 
-        [, $fakeUploadStorage] = $this->uploadChunkedFile('syncvideo.avi', 5000, 4);
+        [$fakeChunkStorage, $fakeUploadStorage, $uuid] = $this->uploadChunkedFile('syncvideo.avi', 5000, 4);
 
         $this->assertFileExists($fakeUploadStorage->path('syncvideo.avi'), 'The merged file was not found.');
+        $fakeChunkStorage->assertMissing($uuid);
 
-        Queue::assertNotPushed(CallQueuedListener::class,
+        Queue::assertNotPushed(
+            CallQueuedListener::class,
             function ($listener) {
                 return $listener->class === MergeChunks::class;
-            });
+            }
+        );
     }
 
     /**
@@ -217,23 +222,29 @@ class ChunkUploadTest extends TestCase
      */
     public function fileChunksAreProperlyCleanedUpAfterUpload()
     {
-        // We want FileUploaded and ChunkFileUploaded to fire in order to invoke MergeChunks
-        // and CleanupUpload, so only fake the events that should not explicitly be called.
-        Event::fake([
-            FileUploaded::class,
-            UploadFailed::class,
-        ]);
-
-        Queue::fake();
-
         Config::set('lodor.merge_chunks.run_async', false);
+        Config::set('lodor.auto_cleanup', false);
+        Config::set('lodor.auto_cleanup_chunks', true);
 
         [$fakeChunkStorage, $fakeUploadStorage, $uploadUuid] = $this->uploadChunkedFile('cleanupvideo.avi', 5000, 4);
 
         $this->assertFileExists($fakeUploadStorage->path('cleanupvideo.avi'), 'The merged file was not found.');
         $this->assertDirectoryNotExists($fakeChunkStorage->path($uploadUuid), 'The chunks have not been cleaned up.');
+    }
 
-        Event::assertDispatched(FileUploaded::class, 1);
+    /**
+     * @test
+     */
+    public function allFilesAreProperlyCleanedUpAfterUpload()
+    {
+        Config::set('lodor.merge_chunks.run_async', false);
+        Config::set('lodor.auto_cleanup', true);
+        Config::set('lodor.auto_cleanup_chunks', true);
+
+        [$fakeChunkStorage, $fakeUploadStorage, $uploadUuid] = $this->uploadChunkedFile('cleanupvideo.avi', 5000, 4);
+
+        $this->assertFileNotExists($fakeUploadStorage->path('cleanupvideo.avi'), 'The merged file was not cleaned up.');
+        $this->assertDirectoryNotExists($fakeChunkStorage->path($uploadUuid), 'The chunks have not been cleaned up.');
     }
 
     /**
