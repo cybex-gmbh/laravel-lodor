@@ -445,7 +445,7 @@ class Lodor
 
             // Remove merged or non-chunked upload file.
             if ($forceDeleteAll || config('lodor.auto_cleanup')) {
-                // Not chunked: upload is on single upload disk, file <uuid>.
+                // Not chunked: upload is on single upload disk, filename depending on the config.
                 // Single file, no directory removal necessary.
                 $storageDisk = Storage::disk(Lodor::getSingleUploadDiskName());
                 $filename    = str_replace($storageDisk->path(''), '', $this->getUploadDestinationFilename($uuid) ?? $uuid);
