@@ -4,6 +4,7 @@ namespace Cybex\Lodor\Tests;
 
 use Cybex\Lodor\Events\FileUploaded;
 use Cybex\Lodor\Events\UploadFailed;
+use Cybex\Lodor\Events\UploadFinished;
 use Cybex\Lodor\LodorFacade as Lodor;
 use Cybex\Lodor\LodorServiceProvider;
 use Illuminate\Http\Request;
@@ -48,6 +49,8 @@ class FileUploadedTest extends TestCase
      */
     public function singleFileUploadSucceeds($filename, $filesize)
     {
+        Config::set('lodor.auto_cleanup', false);
+
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
         $imageFile         = UploadedFile::fake()->create($filename, $filesize);
 
@@ -66,6 +69,8 @@ class FileUploadedTest extends TestCase
      */
     public function maliciousSingleFileUploadFails($filename, $filesize)
     {
+        Config::set('lodor.auto_cleanup', false);
+
         Event::fake();
 
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
@@ -89,6 +94,8 @@ class FileUploadedTest extends TestCase
      */
     public function targetFilenameWithoutExtensionIsSubstitutedWithOriginalExtension()
     {
+        Config::set('lodor.auto_cleanup', false);
+
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
         $imageFile         = UploadedFile::fake()->create('image.jpg', 42);
 
@@ -101,6 +108,8 @@ class FileUploadedTest extends TestCase
      */
     public function targetFilenameWithExtensionIsUsed()
     {
+        Config::set('lodor.auto_cleanup', false);
+
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
         $imageFile         = UploadedFile::fake()->create('image.jpg', 42);
 
@@ -113,6 +122,8 @@ class FileUploadedTest extends TestCase
      */
     public function targetFilenameEndingWithDotStaysWithoutExtension()
     {
+        Config::set('lodor.auto_cleanup', false);
+
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
         $imageFile         = UploadedFile::fake()->create('image.jpg', 42);
 
@@ -125,6 +136,8 @@ class FileUploadedTest extends TestCase
      */
     public function targetFilenamePathsAreStripped()
     {
+        Config::set('lodor.auto_cleanup', false);
+
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
         $imageFile         = UploadedFile::fake()->create('image.jpg', 42);
 
@@ -150,6 +163,7 @@ class FileUploadedTest extends TestCase
     public function existingFilesAreOverwritten()
     {
         Config::set('lodor.file_exists_strategy', 'overwrite');
+        Config::set('lodor.auto_cleanup', false);
 
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
         $imageFile         = UploadedFile::fake()->image('image.jpg', 800, 600)->size(120);
@@ -172,10 +186,29 @@ class FileUploadedTest extends TestCase
     public function existingFilesAreRenamed()
     {
         Config::set('lodor.file_exists_strategy', 'rename');
+        Config::set('lodor.auto_cleanup', false);
 
         $fakeUploadStorage = TestHelper::fakeUploadStorage();
         $imageFile         = UploadedFile::fake()->image('image.jpg', 800, 600)->size(120);
         $this->uploadFile($imageFile);
+
+        // Check if the file was not auto-deleted.
+        $fakeUploadStorage->assertExists('image.jpg');
+
+        Config::set('lodor.auto_cleanup', true);
+
+        $metadata = [];
+        $uuid     = '';
+
+        // Registering a FileUploaded Event will prevent Lodor from triggering the UploadFinished event on its own,
+        // giving us the opportunity to check if the file exists before it is auto-removed.
+        Event::listen(
+            FileUploaded::class,
+            function ($event) use ($fakeUploadStorage, &$uuid, &$metadata) {
+                $uuid = $event->uuid;
+                $metadata = $event->metadata;
+            }
+        );
 
         $imageFile = UploadedFile::fake()->image('image.jpg', 1024, 768)->size(80);
         $this->uploadFile($imageFile);
@@ -183,6 +216,18 @@ class FileUploadedTest extends TestCase
         $fakeUploadStorage->assertExists('image_0001.jpg');
         $imageSize = getimagesize($fakeUploadStorage->path('image_0001.jpg'));
         $this->assertEquals(1024, $imageSize[0]);
+        $this->assertEquals($fakeUploadStorage->path('image_0001.jpg'), $metadata['finalFilename'], 'FinalFilename is incorrect.');
+        $this->assertEquals(
+            $fakeUploadStorage->path('image_0001.jpg'),
+            Lodor::getUploadDestinationFilename($uuid),
+            'GetUploadDestinationFilename returns incorrect final filename.'
+        );
+
+        // Fire UploadFinished event to trigger cleanup.
+        event(new UploadFinished($uuid, $metadata));
+
+        // Check if the file was auto-deleted.
+        $fakeUploadStorage->assertMissing('image_0001.jpg');
     }
 
     /**

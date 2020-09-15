@@ -1,7 +1,8 @@
 # Laravel Lodor
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
-[![Github all releases](https://img.shields.io/github/downloads/cybex-gmbh/laravel-lodor/total.svg)](https://github.com/cybex-gmbh/laravel-lodor/releases/)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/cybex/laravel-lodor.svg)](https://packagist.org/packages/cybex/laravel-lodor)
+![Github build status](https://github.com/cybex-gmbh/laravel-lodor/workflows/tests/badge.svg)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/pull/)
 [![GitHub issues](https://img.shields.io/github/issues/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/issues/)
 [![GitHub contributors](https://img.shields.io/github/contributors/cybex-gmbh/laravel-lodor.svg)](https://github.com/cybex-gmbh/laravel-lodor/graphs/contributors/)
@@ -38,7 +39,7 @@ To get started with a simple HTML file upload, the only thing you really have to
 ``` html
 <form id="upload-form" enctype="multipart/form-data" method="post" action="{{ Lodor::getUploadRoute() }}">
     @csrf
-    <label for="file">Upload a file with Lodor:</label>
+    <label for="file-input">Upload a file with Lodor:</label>
     <input type="file" name="file" id="file-input" multiple />
     <input type="submit">
 </form>
@@ -51,6 +52,37 @@ The HTML form above will upload the file to your storage directory and, by defau
     {"success":true,"uuid":"ffb3dfe7-9029-4b9a-abfe-5e7485592561"}
     
 This setup is useful for asynchronous uploads using Javascripts, particularly when using Javascript libraries like [Dropzone.js](https://www.dropzonejs.com) or [Resumable.js](http://www.resumablejs.com).
+
+### Redirecting to a Controller after Upload
+   
+If you want to process the form yourself instead after the upload completed, you may define a named route by the name of `lodor_uploaded` like this:
+
+``` php
+Route::post('/uploaded')->uses('SomeController@uploaded')->name('lodor_uploaded');
+```
+
+If this named route exists, Lodor will automatically redirect the request to the specified controller action instead of returning a JSON response. The controller method should be declared as follows:
+
+``` php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
+class SomeController extends Controller 
+{
+   function uploaded(Request $request, bool $success, string $uuid, array $metadata, string $errorMessage = null) {
+        // Do something here and handle the request returning some response, view or redirect.
+    }
+}
+```
+* `$request` contains all request data of the file upload form.
+* `$success` is `true` if the upload succeeded, and `false` if not.
+* `$uuid` contains the unique id of the upload.
+* `$metadata` is an array containing detail info about the uploaded file.
+* `$errormessage` contains the error message if the upload failed or is null otherwise.
 
 ### Chunked uploads
 
@@ -88,36 +120,97 @@ The available options with their corresponding env settings and defaults are:
 | merge_chunks.auto_merge_chunks | LODOR_AUTO_MERGE_CHUNKS      | true            | If set to `true`, _Lodor_ will automatically merge the chunks back to one single file and store it in the `disk_uploads` disk. If set to `false`, the upload process will finish after uploading all chunks to the server. This is useful if you want to re-use the chunks, e.g. for forwarding them to a different server or if you want to implement your own merge algorithm by registering a listener for the `FileUploaded` event.                                                                                                  |
 | merge_chunks.run_async         | LODOR_MERGE_ASYNC            | true            | If set to `true`, the merge process will queue on the `merge_chunks.default_queue` and will wait for the worker to process the job. If you don't want to use worker queues, you can set this to `false` to merge the chunks immediately after uploading. __Warning__: this merges all chunks of an upload immediately after uploading the last chunk. For large chunks or slow transfers, this may exceed the maximum execution time for script execution. You should only set this option to false if you are not concerned about this. |
 | merge_chunks.default_queue     | LODOR_DEFAULT_MERGE_QUEUE    | default         | You may set a different queue name for the merge jobs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| auto_cleanup                   | LODOR_AUTO_CLEANUP           | false           | Specifies if Lodor should automatically delete the finished upload files after the UploadFinished event is triggered. (see [Cleanup](#Cleanup) for details).                                                                                                                                                                                                                                                                                                                                                                             |
+| auto_cleanup_chunks            | LODOR_AUTO_CLEANUP_CHUNKS    | true            | Defines if Lodor should automatically delete the temporary chunks folder for chunked uploads (see [Cleanup](#Cleanup) for details).                                                                                                                                                                                                                                                                                                                                                                                                      |
 
+### Cleanup
 
-### Redirecting to a Controller after Upload
-   
-If you want to process the form yourself instead after the upload completed, you may define a named route by the name of `lodor_uploaded` like this:
+`Lodor` automatically runs a cleanup if the UploadFailed event is triggered after an upload fails or the UploadFinished event is triggered after successful completion.
+In case of a failing upload, all files - chunks and merged - are always forcibly deleted regardless of your configuration settings.
 
-    Route::post('/uploaded')->uses('SomeController@uploaded')->name('lodor_uploaded');
+In case of a successfully finished upload, the behavior depends on a number of configuration settings. By default, `Lodor` will delete all existing file chunks during cleanup, but not the merged files in the upload disk.
+ 
+To change this default behavior, you can set `lodor.auto_cleanup_chunks` to `false` to leave the chunks in place after uploading, and `lodor.auto_cleanup` to `true` to always delete the finished uploads once they are completed (as indicated by the `UploadFinished` event).
 
-If this named route exists, Lodor will automatically redirect the request to the specified controller action instead of returning a JSON response. The controller method should be declared as follows:
+#### Using auto-cleanup
 
-```php
-<?php
+In a basic setup with no further event listeners registered, Lodor always triggers the `UploadFinished` event once the non-chunked upload succeeded or the chunked upload was successfully merged.
+Therefore, `auto_cleanup` is set to `false` by default. If you set it to `true`, your uploads would otherwise be gone the second they are finished.
 
-namespace App\Http\Controllers;
+If you want to use `auto_cleanup`, you need to make sure that you register a listener for the `FileUploaded` event, usually by adding it to your EventServiceProvider (see [Registering Events & Listeners](https://laravel.com/docs/7.x/events#registering-events-and-listeners) in the Laravel docs for details).
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+You can simply use Laravel's generator to create a listener class for you, e.g.
 
-class SomeController extends Controller 
-{
-   function uploaded(Request $request, bool $success, string $uuid, array $metadata, string $errorMessage = null) {
-        // Do something here and handle the request returning some response, view or redirect.
-    }
-}
+``` bash
+artisan make:listener -e "\Cybex\Lodor\Events\FileUploaded" -- FileUploadedListener
 ```
-* `$request` contains all request data of the file upload form.
-* `$success` is `true` if the upload succeeded, and `false` if not.
-* `$uuid` contains the unique id of the upload.
-* `$metadata` is an array containing detail info about the uploaded file.
-* `$errormessage` contains the error message if the upload failed or is null otherwise.
+
+Then include it in your EventServiceProvider $listener property:
+
+``` php
+use App\Listeners\FileUploadedListener;
+use Cybex\Lodor\Events\FileUploaded;
+
+class EventServiceProvider extends ServiceProvider
+{
+    /**
+     * The event listener mappings for the application.
+     *
+     * @var array
+     */
+    protected $listen = [
+        FileUploaded::class => [
+            FileUploadedListener::class,
+        ],
+    ];
+``` 
+
+Inside your `FileUploadedListener` class, you should then process the file as needed in the `handle()` method and trigger the `UploadFinished` event to indicate that you are done processing and the files can be cleaned up:
+
+``` php
+    /**
+     * Handle the event.
+     *
+     * @param  FileUploaded  $event
+     * @return void
+     */
+    public function handle(FileUploaded $event)
+    {
+        $uuid     = $event->uuid;
+        $metadata = $event->metadata;
+
+        // You are also responsible to post updates on the status of the process using Lodor::setUploadStatus()
+        // to keep the frontend up to date on the progress and any info you want to publish along with it.
+        // After the server upload finishes, the upload is put in "waiting" state until the listener(s)
+        // process(es) the upload and set the status to "done" state.
+        Lodor::setUploadStatus($event->uuid,
+            'done',
+            __('Server upload finished.'),
+            __('Upload complete.', ['uuid' => $uuid]),
+            100,
+            $metadata);
+
+        // Then fire the UploadFinished event to signalize that the upload has completed processing.
+        event(new UploadFinished($event->uuid, $event->metadata));
+    }
+``` 
+
+#### Cleaning up manually
+
+You may also choose to keep `auto_cleanup` disabled and do the cleanup yourself. You can do so by following the steps above and add
+
+``` php
+Lodor::cleanupUpload($event->uuid, true);
+```
+
+to your listener's `handle()` method. The second parameter specifies if all files should be forcibly deleted, regardless of the config settings.
+
+#### Caveats
+
+Sometimes, files might not be cleaned up at all, either because the cache info of the upload was deleted, your listener(s) are crashing or if you use queued event listeners and your job queue is failing or not running at all.
+To make sure leftover files are cleaned up, you may want to schedule a cron job that deletes old files from the `lodor_chunked` and `lodor_uploads` storage disks and the according info from the cache periodically.
+In future versions of `Lodor`, it is planned to implement both a Listener and an artisan command to clean up periodically.   
+
 
 ### Testing
 
@@ -125,9 +218,9 @@ class SomeController extends Controller
 composer test
 ```
 
-### Changelog
+### To do
 
-Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
+- Cleanup Command for leftover uploads.
 
 ## Contributing
 
