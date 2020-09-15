@@ -3,6 +3,7 @@
 namespace Cybex\Lodor;
 
 use Cybex\Lodor\Events\ChunkedFileUploaded;
+use Cybex\Lodor\Events\UploadFailed;
 use Cybex\Lodor\Events\UploadFinished;
 use Cybex\Lodor\Listeners\CleanupUpload;
 use Cybex\Lodor\Listeners\MergeChunks;
@@ -16,7 +17,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         UploadFinished::class      => [
             CleanupUpload::class,
-        ]
+        ],
+        UploadFailed::class        => [
+            CleanupUpload::class,
+        ],
     ];
 
     /**

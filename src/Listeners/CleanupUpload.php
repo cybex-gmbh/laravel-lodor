@@ -2,6 +2,7 @@
 
 namespace Cybex\Lodor\Listeners;
 
+use Cybex\Lodor\Events\UploadFailed;
 use Cybex\Lodor\Events\UploadFinished;
 use Cybex\Lodor\LodorFacade as Lodor;
 
@@ -18,14 +19,13 @@ class CleanupUpload
     /**
      * Handle the event.
      *
-     * @param UploadFinished $event
+     * @param UploadFinished|UploadFailed $event
      *
      * @return void
      */
-    public function handle(UploadFinished $event)
+    public function handle($event)
     {
-        if (config('lodor.auto_cleanup', true)) {
-            Lodor::cleanupUpload($event->uuid, $event->metadata['chunked'] ?? null);
-        }
+        // If the listener is triggered by an UploadFailed event, force cleanup.
+        Lodor::cleanupUpload($event->uuid, is_a($event, UploadFailed::class));
     }
 }

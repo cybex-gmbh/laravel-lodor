@@ -212,10 +212,25 @@ return [
     |--------------------------------------------------------------------------
     |
     | This setting determines whether Lodor should automatically clean up files
-    | and cache entries after itself.
+    | and cache entries after itself. Note that setting this option to true
+    | will delete your uploaded files immediately after the upload is finished.
+    | You will need to move or otherwise process the file inside a FileUploaded
+    | event listener if you choose to use auto_cleanup.
     |
     */
-    'auto_cleanup' => env('LODOR_AUTO_CLEANUP', true),
+    'auto_cleanup'       => env('LODOR_AUTO_CLEANUP', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Automatic cleanup of temporary chunked files
+    |--------------------------------------------------------------------------
+    |
+    | By default, Lodor automatically cleans up any chunked file directories
+    | after merging. You can prevent this from happening by setting
+    | auto_cleanup_chunks to false.
+    |
+    */
+    'auto_cleanup_chunks' => env('LODOR_AUTO_CLEANUP_CHUNKS', true),
 
     /*
     |--------------------------------------------------------------------------

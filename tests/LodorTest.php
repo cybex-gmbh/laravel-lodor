@@ -2,6 +2,8 @@
 
 namespace Cybex\Lodor\Tests;
 
+use Config;
+use Cybex\Lodor\Events\UploadFailed;
 use Cybex\Lodor\LodorFacade as Lodor;
 use Cybex\Lodor\LodorServiceProvider;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -99,6 +101,8 @@ class LodorTest extends TestCase
     {
         $uuid = Uuid::uuid4()->toString();
 
+        Config::set('lodor.auto_cleanup', false);
+
         $this->addSingleUploadFile($uuid);
         $this->addChunkedFolder($uuid);
 
@@ -114,9 +118,56 @@ class LodorTest extends TestCase
     /**
      * @test
      */
-    public function cleanupUploadRemovesSingleUploadFile()
+    public function cleanupUploadDoesNotRemoveAnything()
     {
         $uuid = Uuid::uuid4()->toString();
+
+        Config::set('lodor.auto_cleanup', false);
+        Config::set('lodor.auto_cleanup_chunks', false);
+
+        $this->addSingleUploadFile($uuid);
+        $this->addChunkedFolder($uuid);
+
+        Lodor::cleanupUpload($uuid);
+
+        $storageDiskChunked = $this->getChunkedDisk();
+        $storageDiskSingle  = $this->getSingleDisk();
+
+        $storageDiskChunked->assertExists($uuid);
+        $storageDiskSingle->assertExists($uuid);
+    }
+
+    /**
+     * @test
+     */
+    public function cleanupUploadAlwaysRemovesEverythingOnUploadFailed()
+    {
+        $uuid = Uuid::uuid4()->toString();
+
+        Config::set('lodor.auto_cleanup', false);
+        Config::set('lodor.auto_cleanup_chunks', false);
+
+        $this->addSingleUploadFile($uuid);
+        $this->addChunkedFolder($uuid);
+
+        // Trigger failure event.
+        event(new UploadFailed($uuid, 'Test Error Message'));
+
+        $storageDiskChunked = $this->getChunkedDisk();
+        $storageDiskSingle  = $this->getSingleDisk();
+
+        $storageDiskChunked->assertMissing($uuid);
+        $storageDiskSingle->assertMissing($uuid);
+    }
+
+    /**
+     * @test
+     */
+    public function cleanupUploadRemovesSingleUploadFileWithAutoCleanup()
+    {
+        $uuid = Uuid::uuid4()->toString();
+
+        Config::set('lodor.auto_cleanup', true);
 
         $this->addSingleUploadFile($uuid);
         Lodor::cleanupUpload($uuid);

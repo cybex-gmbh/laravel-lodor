@@ -71,7 +71,7 @@ class MergeChunks implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param ChunkedFileUploaded $event
+     * @param ChunkedFileUploaded|null $event
      *
      * @return void
      */

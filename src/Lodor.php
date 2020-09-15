@@ -111,6 +111,7 @@ class Lodor
     public function getUploadStatus(string $uuid): array
     {
         $cachePrefix = config('lodor.cache.upload_status.prefix', 'LODOR_STATUS');
+
         return Cache::get(sprintf('%s_%s', $cachePrefix, $uuid)) ?? [];
     }
 
@@ -132,25 +133,33 @@ class Lodor
         }
 
         $uuidCollection   = collect($uuids);
-        $statusCollection = $uuidCollection->map(function ($uuid) {
-            return $this->getUploadStatus($uuid);
-        })->filter();
+        $statusCollection = $uuidCollection->map(
+            function ($uuid) {
+                return $this->getUploadStatus($uuid);
+            }
+        )->filter();
 
         $totalUploads = $uuidCollection->count();
 
-        $completedUploads = $statusCollection->reduce(function ($carry, $uploadStatus) {
-            return $carry + ($uploadStatus['state'] == 'done' ? 1 : 0);
-        });
+        $completedUploads = $statusCollection->reduce(
+            function ($carry, $uploadStatus) {
+                return $carry + ($uploadStatus['state'] == 'done' ? 1 : 0);
+            }
+        );
 
         $remainingUploads = $totalUploads - $completedUploads;
 
-        $progress = $statusCollection->reduce(function ($carry, $uploadStatus) {
-                return $carry + $uploadStatus['progress'];
-            }) / $totalUploads;
+        $progress = $statusCollection->reduce(
+                function ($carry, $uploadStatus) {
+                    return $carry + $uploadStatus['progress'];
+                }
+            ) / $totalUploads;
 
-        $metadata = $statusCollection->mapWithKeys(function ($status) {
-            return [$status['uuid'] => $status['metadata']];
-        });
+        $metadata = $statusCollection->mapWithKeys(
+            function ($status) {
+                return [$status['uuid'] => $status['metadata']];
+            }
+        );
 
         // If there is only one upload in the uuid list, return the detailed info for this upload.
         // In multi uploads, we only include the generic info below.
@@ -160,11 +169,17 @@ class Lodor
 
         return [
             'state'    => $remainingUploads ? 'processing' : 'done',
-            'status'   => $remainingUploads ? __('Waiting for :remaining_uploads_count uploads to finish processing...',
-                ['remaining_uploads_count' => $remainingUploads]) : __('Processing complete.'),
-            'info'     => $remainingUploads ? __(':remaining_uploads_count of :total_uploads_count files left...',
-                ['remaining_uploads_count' => $remainingUploads, 'total_uploads_count' => $totalUploads]) : __('Completed upload of :total_uploads_count files.',
-                ['total_uploads_count' => $totalUploads]),
+            'status'   => $remainingUploads ? __(
+                'Waiting for :remaining_uploads_count uploads to finish processing...',
+                ['remaining_uploads_count' => $remainingUploads]
+            ) : __('Processing complete.'),
+            'info'     => $remainingUploads ? __(
+                ':remaining_uploads_count of :total_uploads_count files left...',
+                ['remaining_uploads_count' => $remainingUploads, 'total_uploads_count' => $totalUploads]
+            ) : __(
+                'Completed upload of :total_uploads_count files.',
+                ['total_uploads_count' => $totalUploads]
+            ),
             'progress' => $progress,
             'uuids'    => $uuids,
             'metadata' => $metadata,
@@ -198,7 +213,8 @@ class Lodor
     {
         $cacheConfig = config('lodor.cache.upload_status');
 
-        Cache::set(sprintf('%s_%s', $cacheConfig['prefix'] ?? 'LODOR_STATUS', $uuid),
+        Cache::set(
+            sprintf('%s_%s', $cacheConfig['prefix'] ?? 'LODOR_STATUS', $uuid),
             [
                 'state'     => $state,
                 'status'    => $status,
@@ -208,7 +224,8 @@ class Lodor
                 'metadata'  => $metadata,
                 'timestamp' => time(),
             ],
-            $cacheConfig['ttl'] ?? 3600);
+            $cacheConfig['ttl'] ?? 3600
+        );
     }
 
     /**
@@ -292,6 +309,7 @@ class Lodor
     public function setUploadConfig(string $uuid, array $uploadConfig): bool
     {
         $cacheConfig = config('lodor.cache.upload_config');
+
         return Cache::set(sprintf('%s_%s', $cacheConfig['prefix'] ?? 'LODOR', $uuid), $uploadConfig, $cacheConfig['ttl'] ?? 3600);
     }
 
@@ -329,6 +347,7 @@ class Lodor
     {
         $uploadConfig                  = $this->getUploadConfig($uuid);
         $uploadConfig['finalFilename'] = $absoluteDestinationFilename;
+
         return $this->setUploadConfig($uuid, $uploadConfig);
     }
 
@@ -359,8 +378,12 @@ class Lodor
                 if (File::exists($absoluteChunkFilename)) {
                     $chunks[] = $absoluteChunkFilename;
                 } else {
-                    throw new FileNotFoundException(__('Chunk number :chunk_number of :total_chunk_count (:chunk_filename) not found for upload with UUID :uuid.',
-                        ['total_chunk_count' => $chunkCount, 'chunk_number' => $i + 1, 'chunk_filename' => $absoluteChunkFilename, 'uuid' => $uuid]));
+                    throw new FileNotFoundException(
+                        __(
+                            'Chunk number :chunk_number of :total_chunk_count (:chunk_filename) not found for upload with UUID :uuid.',
+                            ['total_chunk_count' => $chunkCount, 'chunk_number' => $i + 1, 'chunk_filename' => $absoluteChunkFilename, 'uuid' => $uuid]
+                        )
+                    );
                 }
             }
         }
@@ -378,51 +401,64 @@ class Lodor
      * @throws UnexpectedValueException
      *
      */
-    public function getUploadDestinationFilename(string $uuid): string
+    public function getUploadDestinationFilename(string $uuid): ?string
     {
-        $uploadConfig = $this->getUploadConfig($uuid);
-
-        if (!array_key_exists('finalFilename', $uploadConfig)) {
-            throw new UnexpectedValueException(__('No file info found in config for upload with UUID :uuid.', ['uuid' => $uuid]));
+        if (!$this->hasUploadConfig($uuid)) {
+            return null;
         }
 
-        return $uploadConfig['finalFilename'];
+        $uploadConfig = $this->getUploadConfig($uuid);
+
+        return $uploadConfig['finalFilename'] ?? null;
     }
 
     /**
      * Removes the upload file(s) for the upload specified by the $uuid.
      * If the optional $isChunked parameter is not specified, we try to
      * determine whether the upload is chunked or not from the config.
+     * If $forceDeleteAll is set, all files will be removed regardless
+     * of the config settings. This is for cleaning up after a failed
+     * upload.
      *
-     * @param string    $uuid
-     *
-     * @param bool|null $isChunked
+     * @param string $uuid
+     * @param bool   $forceDeleteAll
      *
      * @return bool
      */
-    public function removeUploadFiles(string $uuid, bool $isChunked = null): bool
+    public function removeUploadFiles(string $uuid, bool $forceDeleteAll = false): bool
     {
-        $isChunked = $isChunked ?? $this->isChunked($uuid);
-
-        if ($isChunked) {
-            // Chunked: upload is on chunked upload disk in folder <uuid>.$
-            // The whole directory must be deleted.
-            if ($uuid) {
+        if ($uuid) {
+            if ($forceDeleteAll || config('lodor.auto_cleanup_chunks')) {
+                // Remove chunked file if exists.
                 $storageDisk = Storage::disk(Lodor::getChunkedUploadDiskName());
-                try {
-                    $storageDisk->deleteDirectory($uuid);
-                } catch (Exception $e) {
-                    return false;
+
+                // Upload is on chunked upload disk in folder <uuid>.
+                // The whole directory must be deleted.
+                if ($storageDisk->exists($uuid)) {
+                    try {
+                        $storageDisk->deleteDirectory($uuid);
+                    } catch (Exception $e) {
+                        return false;
+                    }
                 }
             }
-        } else {
-            // Not chunked: upload is on single upload disk, file <uuid>.
-            // Single file, no directory removal necessary.
-            $storageDisk = Storage::disk(Lodor::getSingleUploadDiskName());
-            try {
-                $storageDisk->delete($uuid);
-            } catch (Exception $e) {
-                return false;
+
+            // Remove merged or non-chunked upload file.
+            if ($forceDeleteAll || config('lodor.auto_cleanup')) {
+                // Not chunked: upload is on single upload disk, filename depending on the config.
+                // Single file, no directory removal necessary.
+                $storageDisk = Storage::disk(Lodor::getSingleUploadDiskName());
+                $filename    = str_replace($storageDisk->path(''), '', $this->getUploadDestinationFilename($uuid) ?? $uuid);
+
+                if ($storageDisk->exists($filename)) {
+                    try {
+                        $storageDisk->delete($filename);
+                    } catch (Exception $e) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             }
         }
 
@@ -433,12 +469,12 @@ class Lodor
      * Cleans up files and configs that are not needed anymore after an upload succeeded or failed.
      * We do not remove the upload status cache yet, as it might still be needed for frontend use.
      *
-     * @param string    $uuid
-     * @param bool|null $isChunked
+     * @param string $uuid
+     * @param bool   $forceDeleteAll
      */
-    public function cleanupUpload(string $uuid, bool $isChunked = null)
+    public function cleanupUpload(string $uuid, bool $forceDeleteAll = false)
     {
-        $this->removeUploadFiles($uuid, $isChunked);
+        $this->removeUploadFiles($uuid, $forceDeleteAll);
         $this->removeUploadConfig($uuid);
     }
 
@@ -453,6 +489,7 @@ class Lodor
     {
         if ($this->hasUploadConfig($uuid)) {
             $config = $this->getUploadConfig($uuid);
+
             return $config['chunked'] ?? false;
         }
 
@@ -474,7 +511,7 @@ class Lodor
      * @param FilesystemAdapter $disk
      * @param string            $relativeFilename
      *
-     * @return string|void
+     * @return string|null
      */
     public function resolveFileExists(FilesystemAdapter $disk, string $relativeFilename): ?string
     {
@@ -504,19 +541,26 @@ class Lodor
     /**
      * Returns the destination filename of the upload according to the configuration.
      *
-     * @param string       $uuid
-     * @param string       $requestFilename
-     * @param string       $originalFilename
-     * @param string       $originalExtension
-     * @param UploadedFile $file
-     * @param Request|null $request
-     * @param array|null   $config
+     * @param string            $uuid
+     * @param string            $requestFilename
+     * @param string            $originalFilename
+     * @param string            $originalExtension
+     * @param UploadedFile|null $file
+     * @param Request|null      $request
+     * @param array|null        $config
      *
      * @return string
      */
     public function getUploadFilename(
-        string $uuid, string $requestFilename, string $originalFilename, string $originalExtension, UploadedFile $file = null, Request $request = null, array $config = null
-    ): string {
+        string $uuid,
+        string $requestFilename,
+        string $originalFilename,
+        string $originalExtension,
+        UploadedFile $file = null,
+        Request $request = null,
+        array $config = null
+    ): string
+    {
         $originalFilename  = $this->cleanFilename($originalFilename);
         $originalExtension = $this->cleanFilename($originalExtension);
         $requestFilename   = $this->cleanFilename($requestFilename);
@@ -579,9 +623,9 @@ class Lodor
      */
     public function finishUpload(string $uploadUuid, array $uploadInfo = [])
     {
-        $state = 'server_upload_done';
-
+        $state        = 'server_upload_done';
         $hasListeners = Event::hasListeners(FileUploaded::class);
+
         if ($hasListeners) {
             $state = 'server_upload_waiting';
         }
@@ -589,6 +633,7 @@ class Lodor
         $this->setUploadState($uploadUuid, $state, ['uuid' => $uploadUuid]);
 
         event(new FileUploaded($uploadUuid, $uploadInfo));
+
         if (!$hasListeners) {
             // No listeners waiting to act on this upload:
             // We are done and can do cleanup.
@@ -655,6 +700,7 @@ class Lodor
             if ($uploaderClass::isChunkedRequest($request)) {
                 return new $uploaderClass($request);
             }
+
             return null;
         }
 
@@ -720,11 +766,13 @@ class Lodor
                 // Destination file already exists: act according to configuration.
                 $destinationFilename = $this->resolveFileExists($completeStorageDisk, $destinationFilename);
                 if ($destinationFilename === null) {
-                    $this->setUploadStatus($uuid,
+                    $this->setUploadStatus(
+                        $uuid,
                         'error',
                         __('Merging chunks...'),
                         __('The destination file :filename already exists.', ['filename' => $destinationFilename]),
-                        100);
+                        100
+                    );
 
                     throw new FileExistsException(__('The destination file :filename already exists.', ['filename' => $destinationFilename]));
                 }
@@ -744,22 +792,28 @@ class Lodor
 
                         stream_copy_to_stream($sourceFileHandle, $destinationFileHandle);
                     } else {
-                        $this->setUploadStatus($uuid,
+                        $this->setUploadStatus(
+                            $uuid,
                             'error',
                             __('Merging chunks...'),
-                            __('Missing chunk :missing_chunk of :total_chunks: expected file :missing_filename',
-                                ['missing_chunk' => $i + 1, 'total_chunks' => $chunkCount, 'missing_filename' => $absoluteChunkFilename]),
-                            100);
+                            __(
+                                'Missing chunk :missing_chunk of :total_chunks: expected file :missing_filename',
+                                ['missing_chunk' => $i + 1, 'total_chunks' => $chunkCount, 'missing_filename' => $absoluteChunkFilename]
+                            ),
+                            100
+                        );
 
                         throw new FileNotFoundException(sprintf('File not found for chunk %d of %d: expected file %s', $i + 1, $chunkCount, $absoluteChunkFilename));
                     }
                 }
             } catch (Exception $e) {
                 // File/disk related error.
-                $this->setUploadStatus($uuid,
+                $this->setUploadStatus(
+                    $uuid,
                     'error',
                     __('Merging chunks...'),
-                    __(':exception_class while merging: :exception_message', ['exception_class' => get_class($e), 'exception_message' => $e->getMessage()], 100));
+                    __(':exception_class while merging: :exception_message', ['exception_class' => get_class($e), 'exception_message' => $e->getMessage()], 100)
+                );
 
                 throw new FileNotFoundException($e);
             } finally {
