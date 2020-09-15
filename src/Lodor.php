@@ -425,7 +425,7 @@ class Lodor
      *
      * @return bool
      */
-    public function removeUploadFiles(string $uuid, bool $forceDeleteAll = null): bool
+    public function removeUploadFiles(string $uuid, bool $forceDeleteAll = false): bool
     {
         if ($uuid) {
             if ($forceDeleteAll || config('lodor.auto_cleanup_chunks')) {
@@ -469,10 +469,10 @@ class Lodor
      * Cleans up files and configs that are not needed anymore after an upload succeeded or failed.
      * We do not remove the upload status cache yet, as it might still be needed for frontend use.
      *
-     * @param string    $uuid
-     * @param bool|null $forceDeleteAll
+     * @param string $uuid
+     * @param bool   $forceDeleteAll
      */
-    public function cleanupUpload(string $uuid, bool $forceDeleteAll = null)
+    public function cleanupUpload(string $uuid, bool $forceDeleteAll = false)
     {
         $this->removeUploadFiles($uuid, $forceDeleteAll);
         $this->removeUploadConfig($uuid);
@@ -541,13 +541,13 @@ class Lodor
     /**
      * Returns the destination filename of the upload according to the configuration.
      *
-     * @param string       $uuid
-     * @param string       $requestFilename
-     * @param string       $originalFilename
-     * @param string       $originalExtension
-     * @param UploadedFile $file
-     * @param Request|null $request
-     * @param array|null   $config
+     * @param string            $uuid
+     * @param string            $requestFilename
+     * @param string            $originalFilename
+     * @param string            $originalExtension
+     * @param UploadedFile|null $file
+     * @param Request|null      $request
+     * @param array|null        $config
      *
      * @return string
      */
