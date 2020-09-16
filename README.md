@@ -51,7 +51,7 @@ The HTML form above will upload the file to your storage directory and, by defau
 
     {"success":true,"uuid":"ffb3dfe7-9029-4b9a-abfe-5e7485592561"}
     
-This setup is useful for asynchronous uploads using Javascripts, particularly when using Javascript libraries like [Dropzone.js](https://www.dropzonejs.com) or [Resumable.js](http://www.resumablejs.com).
+This setup is useful for asynchronous uploads using Javascript, particularly when using libraries like [Dropzone.js](https://www.dropzonejs.com) or [Resumable.js](http://www.resumablejs.com).
 
 ### Redirecting to a Controller after Upload
    
