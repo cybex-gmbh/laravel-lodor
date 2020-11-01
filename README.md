@@ -94,7 +94,7 @@ _Lodor_ was created with a setup in mind that works out of the box for most situ
 You can publish the config using the following command:
 
 ```bash
-artisan vendor:publish --provider="Cybex\Lodor\LodorServiceProvider" --tag=config
+php artisan vendor:publish --provider="Cybex\Lodor\LodorServiceProvider" --tag=config
 ```
 
 Most of the settings can also be adjusted by environment settings that you can put in your .env file as needed.
