@@ -4,7 +4,6 @@
          backupStaticAttributes="false"
          colors="true"
          verbose="true"
-         testdox="true"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
