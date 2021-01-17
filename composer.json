@@ -20,12 +20,12 @@
         }
     ],
     "require": {
-        "php": "^7.2",
+        "php": "^7.2|^8.0",
         "voku/portable-ascii": "^1.5"
     },
     "require-dev": {
         "orchestra/testbench": "^4.0",
-        "phpunit/phpunit": "^8.0",
+        "phpunit/phpunit": "^9.0",
         "sempro/phpunit-pretty-print": "^1.2"
     },
     "autoload": {
