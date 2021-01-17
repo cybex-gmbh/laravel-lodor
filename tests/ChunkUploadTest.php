@@ -183,7 +183,7 @@ class ChunkUploadTest extends TestCase
 
         [, $fakeUploadStorage] = $this->uploadChunkedFile('automerge.avi', 5000, 4);
 
-        $this->assertFileNotExists($fakeUploadStorage->path('automerge.avi'), 'The file was merged despite auto_merge_chunks was set to false.');
+        $this->assertFileDoesNotExist($fakeUploadStorage->path('automerge.avi'), 'The file was merged despite auto_merge_chunks was set to false.');
 
         Queue::assertNotPushed(CallQueuedListener::class,
             function ($listener) {
@@ -229,7 +229,7 @@ class ChunkUploadTest extends TestCase
         [$fakeChunkStorage, $fakeUploadStorage, $uploadUuid] = $this->uploadChunkedFile('cleanupvideo.avi', 5000, 4);
 
         $this->assertFileExists($fakeUploadStorage->path('cleanupvideo.avi'), 'The merged file was not found.');
-        $this->assertDirectoryNotExists($fakeChunkStorage->path($uploadUuid), 'The chunks have not been cleaned up.');
+        $this->assertDirectoryDoesNotExist($fakeChunkStorage->path($uploadUuid), 'The chunks have not been cleaned up.');
     }
 
     /**
@@ -243,8 +243,8 @@ class ChunkUploadTest extends TestCase
 
         [$fakeChunkStorage, $fakeUploadStorage, $uploadUuid] = $this->uploadChunkedFile('cleanupvideo.avi', 5000, 4);
 
-        $this->assertFileNotExists($fakeUploadStorage->path('cleanupvideo.avi'), 'The merged file was not cleaned up.');
-        $this->assertDirectoryNotExists($fakeChunkStorage->path($uploadUuid), 'The chunks have not been cleaned up.');
+        $this->assertFileDoesNotExist($fakeUploadStorage->path('cleanupvideo.avi'), 'The merged file was not cleaned up.');
+        $this->assertDirectoryDoesNotExist($fakeChunkStorage->path($uploadUuid), 'The chunks have not been cleaned up.');
     }
 
     /**
