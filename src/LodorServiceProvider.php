@@ -20,13 +20,14 @@ class LodorServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/lodor.php' => config_path('lodor.php'),
-            ],
-                'config');
+                                 __DIR__ . '/../config/lodor.php' => app()->configPath('lodor.php'),
+                             ],
+                             'config');
 
-            $this->publishes([
-                __DIR__ . '/../resources/lang' => resource_path('lang/vendor/lodor'),
-            ],
+            $this->publishes(
+                [
+                    __DIR__ . '/../resources/lang' => app()->langPath('vendor/lodor'),
+                ],
                 'lang');
         }
     }
