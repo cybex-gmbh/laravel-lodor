@@ -2,9 +2,9 @@ name: tests
 
 on:
   push:
-    branches: 
-      - master
-      - release/*
+      branches:
+          - master
+          - release/*
   pull_request:
   workflow_dispatch:
   schedule:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mysql:
-        image: mysql:5.7
+          image: mysql:8.0
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: forge
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php: [7.2, 7.3, 7.4]
+          php: [ 8.0,8.1 ]
         stability: [prefer-lowest, prefer-stable]
 
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
