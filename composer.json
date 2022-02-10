@@ -22,7 +22,7 @@
     "require": {
         "php": "^8.0",
         "illuminate/support": "^9.0",
-        "voku/portable-ascii": "^1.6.1"
+        "voku/portable-ascii": "^2.0"
     },
     "require-dev": {
         "orchestra/testbench": "^7.0",
